@@ -840,7 +840,7 @@
       totalEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
     }
 
-    // ================= CHECKOUT KE /api/charge =================
+    // ================= CHECKOUT KE DOMAIN VERCEL YANG BENAR =================
     function proceedToCheckout() {
       if (cart.length === 0) {
         showToast('Keranjang masih kosong.', 'warning');
@@ -861,7 +861,7 @@
 
       const totalAmount = cart.reduce((sum, item) => sum + item.harga * item.qty, 0);
 
-      fetch('/api/charge', {
+      fetch('https://qmate-backend.vercel.app/api/charge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -897,7 +897,7 @@
 
               ordersList.unshift(newOrder);
 
-              fetch('/api/charge', {
+              fetch('https://qmate-backend.vercel.app/api/charge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
