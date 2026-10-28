@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Midtrans Snap SDK (Production) -->
-  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-xxxxxxxxxxxxxxxx"></script>
+  <!-- Midtrans Snap SDK -->
+  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-oboTEbTlj1tqM8--"></script>
   <style>
     :root {
       --primary: #C2410C;
@@ -627,7 +627,7 @@
     </div>
   </div>
 
-  <!-- Order History / Queue Modal (Untuk Pembeli) -->
+  <!-- Order History / Queue Modal -->
   <div class="modal-overlay" id="orderModal">
     <div class="modal">
       <button class="modal-close" onclick="closeOrderModal()">✕</button>
@@ -683,7 +683,7 @@
     </div>
   </div>
 
-  <!-- Admin Dashboard Modal (Khusus Penjual) -->
+  <!-- Admin Dashboard Modal -->
   <div class="modal-overlay" id="adminModal">
     <div class="modal" style="max-width: 480px;">
       <button class="modal-close" onclick="closeAdminPanel()">✕</button>
@@ -691,9 +691,7 @@
         <h3>Dashboard Penjual</h3>
         <p>Kelola dan selesaikan pesanan masuk</p>
       </div>
-      <div class="modal-body" id="adminOrderContent">
-        <!-- List pesanan penjual -->
-      </div>
+      <div class="modal-body" id="adminOrderContent"></div>
     </div>
   </div>
 
@@ -715,9 +713,8 @@
 
   <script>
     let cart = [];
-    let ordersList = []; // Daftar seluruh antrean pesanan
+    let ordersList = [];
 
-    // Quantity Counter Function
     function changeQty(btn, delta) {
       const qtyVal = btn.parentElement.querySelector('.qty-val');
       let currentQty = parseInt(qtyVal.textContent) || 1;
@@ -725,7 +722,6 @@
       qtyVal.textContent = currentQty;
     }
 
-    // Filter menu
     function setFilter(btn, category) {
       document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -738,7 +734,6 @@
       });
     }
 
-    // Search filter
     const searchInput = document.querySelector('.search-wrap input');
     if (searchInput) {
       searchInput.addEventListener('input', function(e) {
@@ -755,7 +750,6 @@
       });
     }
 
-    // Add to cart
     function addCart(btn) {
       const card = btn.closest('.menu-card');
       const nama = card.querySelector('h3').textContent;
@@ -846,7 +840,7 @@
       totalEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
     }
 
-    // ================= CHECKOUT & KIRIM EMAIL OTOMATIS =================
+    // ================= CHECKOUT KE /api/charge =================
     function proceedToCheckout() {
       if (cart.length === 0) {
         showToast('Keranjang masih kosong.', 'warning');
@@ -867,7 +861,7 @@
 
       const totalAmount = cart.reduce((sum, item) => sum + item.harga * item.qty, 0);
 
-      fetch('https://website-qmate.vercel.app/api/charge', {
+      fetch('/api/charge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -903,8 +897,7 @@
 
               ordersList.unshift(newOrder);
 
-              // ✉️ TEMBAK BACKEND DENGAN NOMOR ANTREAN PENDEK (#001, dll)
-              fetch('https://website-qmate.vercel.app/api/charge', {
+              fetch('/api/charge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -917,10 +910,10 @@
                 })
               })
               .then(res => res.json())
-              .then(mailRes => console.log('Email sukses dikirim:', mailRes))
+              .then(mailRes => console.log('Email sukses:', mailRes))
               .catch(err => console.error('Gagal kirim email:', err));
 
-              showToast(`Pembayaran Berhasil! Antrean #${nextQueueNum} dibuat & Struk dikirim ke email.`, 'success');
+              showToast(`Pembayaran Berhasil! Antrean #${nextQueueNum} dibuat.`, 'success');
               cart = [];
               updateCartBadge();
               customerNameInput.value = '';
@@ -946,7 +939,6 @@
       });
     }
 
-    // ================= FITUR PENJUAL (MODAL PIN & DASHBOARD) =================
     function openPinModal() {
       closeAccountModal();
       document.getElementById('adminPinInput').value = '';
@@ -962,13 +954,13 @@
 
     function verifyPin() {
       const pin = document.getElementById('adminPinInput').value;
-      if (pin === "1234") { // PIN rahasia admin
+      if (pin === "1234") {
         closePinModal();
         renderAdminDashboard();
         document.getElementById('adminModal').classList.add('open');
         document.body.style.overflow = 'hidden';
       } else {
-        showToast('PIN Salah! Coba lagi (1234)', 'error');
+        showToast('PIN Salah! (1234)', 'error');
         document.getElementById('adminPinInput').value = '';
         document.getElementById('adminPinInput').focus();
       }
@@ -1004,14 +996,14 @@
               <strong style="color: var(--dark);">Antrean #${order.queueNumber}</strong>
               <span style="color: ${isDone ? 'var(--green)' : 'var(--primary)'}; font-weight: 700; font-size: 0.85rem;">${order.status}</span>
             </div>
-            <div style="font-size: 0.8rem; color: var(--gray-soft);">Pemesan: ${order.customerName} (${order.customerEmail})</div>
+            <div style="font-size: 0.8rem; color: var(--gray-soft);">Pemesan: ${order.customerName}</div>
             <div style="font-size: 0.8rem; color: var(--gray-soft); margin-bottom: 0.5rem;">Waktu: ${order.paymentTime}</div>
             <div style="font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 0.4rem; margin-bottom: 0.5rem;">
               ${order.items.map(i => `<div>• ${i.nama} (x${i.qty})</div>`).join('')}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-weight: 800; font-size: 0.85rem; color: var(--primary-dark);">Rp ${order.totalAmount.toLocaleString('id-ID')}</span>
-              ${!isDone ? `<button onclick="markAsCompleted('${order.orderId}')" style="background: var(--green); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.75rem; cursor: pointer;">Selesaikan Pesanan ✓</button>` : `<span style="font-size: 0.75rem; color: var(--green); font-weight: 700;">Selesai Disajikan</span>`}
+              ${!isDone ? `<button onclick="markAsCompleted('${order.orderId}')" style="background: var(--green); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.75rem; cursor: pointer;">Selesaikan ✓</button>` : `<span style="font-size: 0.75rem; color: var(--green); font-weight: 700;">Selesai</span>`}
             </div>
           </div>
         `;
@@ -1019,7 +1011,6 @@
       content.innerHTML = html;
     }
 
-    // Tampilan Status Antrean untuk Pembeli
     function openOrderModal() {
       const content = document.getElementById('orderContent');
       if (ordersList.length === 0) {
@@ -1042,7 +1033,7 @@
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-weight: 800; font-size: 0.85rem; color: var(--primary-dark);">Rp ${order.totalAmount.toLocaleString('id-ID')}</span>
                 <span style="font-size: 0.75rem; color: var(--gray-soft); font-weight: 600;">
-                  ${isDone ? 'Pesanan Selesai / Disajikan' : 'Menunggu Penjual Menyiapkan...'}
+                  ${isDone ? 'Pesanan Selesai' : 'Menunggu Penjual...'}
                 </span>
               </div>
             </div>
@@ -1081,7 +1072,6 @@
       }, 3500);
     }
 
-    // Bottom Navigation Actions
     document.getElementById('nav-menu').addEventListener('click', function(e) {
       e.preventDefault();
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
