@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Midtrans Snap SDK (Sandbox) -->
-  <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-xxxxxxxxxxxxxxxx"></script>
+  <!-- Midtrans Snap SDK (Production) -->
+  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-xxxxxxxxxxxxxxxx"></script>
   <style>
     :root {
       --primary: #C2410C;
@@ -913,7 +913,7 @@
                   items: cart,
                   totalAmount: totalAmount,
                   orderId: orderId,
-                  queueNumber: nextQueueNum // <--- Mengirim nomor antrean pendek
+                  queueNumber: nextQueueNum
                 })
               })
               .then(res => res.json())
@@ -942,7 +942,7 @@
       })
       .catch(err => {
         processingModal.classList.remove('open');
-        showToast('Gagal terhubung ke server (Cek backend port 3000).', 'error');
+        showToast('Gagal terhubung ke server Vercel.', 'error');
       });
     }
 
