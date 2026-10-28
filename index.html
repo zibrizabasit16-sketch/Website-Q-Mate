@@ -867,7 +867,7 @@
 
       const totalAmount = cart.reduce((sum, item) => sum + item.harga * item.qty, 0);
 
-      fetch('http://localhost:3000/api/create-transaction', {
+      fetch('https://website-qmate.vercel.app/api/charge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -904,7 +904,7 @@
               ordersList.unshift(newOrder);
 
               // ✉️ TEMBAK BACKEND DENGAN NOMOR ANTREAN PENDEK (#001, dll)
-              fetch('http://localhost:3000/api/send-receipt', {
+              fetch('https://website-qmate.vercel.app/api/charge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
