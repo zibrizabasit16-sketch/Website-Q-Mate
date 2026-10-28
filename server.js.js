@@ -20,7 +20,7 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
+// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'Q-MATE Backend', timestamp: new Date().toISOString() });
 });
@@ -36,10 +36,11 @@ app.use((req, res) => {
 // Global error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Q-MATE Backend running on port ${PORT}`);
-  console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Midtrans API: ${process.env.MIDTRANS_API_BASE || 'sandbox'}`);
-});
+// Hanya jalankan app.listen jika tidak di lingkungan Vercel (untuk development lokal)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Q-MATE Backend running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
