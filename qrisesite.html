@@ -124,7 +124,7 @@
 
     /* Hero Section */
     .hero {
-      padding-top: 80px; /* Account for fixed nav */
+      padding-top: 120px;
       padding-bottom: 6rem;
       background: linear-gradient(180deg, var(--peach-light) 0%, var(--white) 100%);
       min-height: 100vh;
@@ -137,7 +137,7 @@
       margin: 0 auto;
       padding: 0 2rem;
       display: grid;
-      grid-template-cols: 1fr 1fr;
+      grid-template-columns: 1.2fr 0.8fr;
       gap: 4rem;
       align-items: center;
     }
@@ -162,18 +162,83 @@
       max-width: 500px;
     }
 
-    .hero-badge {
-      position: absolute;
-      top: 2rem;
-      right: 2rem;
+    .btn-cta {
+      display: inline-block;
       background: var(--primary-orange);
       color: var(--white);
-      padding: 0.6rem 1.2rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
+      padding: 0.9rem 2.2rem;
+      border-radius: 8px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-cta:hover {
+      background: var(--primary-orange2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(198, 65, 12, 0.3);
+    }
+
+    /* Order Box Card */
+    .order-box {
+      background: var(--white);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(194, 65, 12, 0.15);
+    }
+
+    .order-box h3 {
+      font-size: 1.5rem;
+      color: var(--primary-orange);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--text-gray);
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #CBD5E0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Arimo', sans-serif;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.15);
+    }
+
+    .btn-pay {
+      width: 100%;
+      background: var(--primary-green);
+      color: var(--dark-charcoal);
+      border: none;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      margin-top: 1rem;
+    }
+
+    .btn-pay:hover {
+      background: #6eb71a;
+      transform: translateY(-2px);
     }
 
     /* Stats Section */
@@ -196,12 +261,6 @@
       background: var(--white);
       border-radius: 12px;
       border-top: 4px solid var(--primary-orange);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .stat-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(198, 65, 12, 0.15);
     }
 
     .stat-number {
@@ -218,325 +277,24 @@
       letter-spacing: 1px;
     }
 
-    /* Fitur Section */
-    .fitur-section {
-      padding: 6rem 2rem;
-    }
-
-    .section-header {
-      text-align: center;
-      margin-bottom: 4rem;
-    }
-
-    .section-header h2 {
-      font-size: 2rem;
-      color: var(--primary-orange);
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
-    .section-header p {
-      color: var(--text-gray);
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .fitur-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-
-    .fitur-card {
-      background: var(--white);
-      padding: 2.5rem;
-      border-radius: 16px;
-      border: 1px solid rgba(126, 211, 33, 0.15);
-      transition: border-color 0.3s, transform 0.3s;
-    }
-
-    .fitur-card:hover {
-      border-color: var(--primary-green);
-      transform: translateY(-4px);
-    }
-
-    .fitur-card .icon {
-      width: 60px;
-      height: 60px;
-      background: var(--peach-light);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-      transition: background 0.3s;
-    }
-
-    .fitur-card:hover .icon {
-      background: var(--primary-green);
-    }
-
-    .fitur-card:hover .icon svg {
-      color: var(--white);
-    }
-
-    .fitur-card h3 {
-      font-size: 1.3rem;
-      color: var(--dark-charcoal);
-      margin-bottom: 0.8rem;
-    }
-
-    .fitur-card p {
-      color: var(--text-gray);
-      font-size: 0.95rem;
-    }
-
-    /* QRIS Methods */
-    .qris-methods {
-      padding: 4rem 2rem;
-      background: var(--dark-charcoal);
-      color: var(--white);
-    }
-
-    .qris-methods h2 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .qris-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .qris-item {
-      background: var(--peach-light);
-      padding: 1.5rem;
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid rgba(255, 237, 213, 0.5);
-    }
-
-    .qris-item img {
-      width: 48px;
-      height: 48px;
-      margin: 0 auto 1rem;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
-    }
-
-    .qris-item span {
-      font-size: 0.9rem;
-      display: block;
-      margin-top: 0.5rem;
-    }
-
-    /* About Section */
-    .about-section {
-      padding: 6rem 2rem;
-    }
-
-    .about-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
-    }
-
-    .about-content h3 {
-      color: var(--primary-orange);
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .about-content p {
-      color: var(--text-gray);
-      margin-bottom: 1.5rem;
-      font-size: 1rem;
-    }
-
-    .about-content ul {
-      color: var(--text-gray);
-      margin-bottom: 1.5rem;
-      padding-left: 1.5rem;
-    }
-
-    .about-content li {
-      margin-bottom: 0.5rem;
-    }
-
-    .about-image {
-      text-align: center;
-    }
-
-    .about-image img {
-      max-width: 100%;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    }
-
-    /* CTA Section */
-    .cta-section {
-      padding: 6rem 2rem;
-      text-align: center;
-    }
-
-    .cta-section .bg-overlay {
-      background: linear-gradient(135deg, var(--primary-orange), var(--primary-orange2));
-      padding: 4rem 2rem;
-      border-radius: 20px;
-      margin: 0 auto 2rem;
-      max-width: 600px;
-    }
-
-    .cta-section h2 {
-      color: var(--white);
-      font-size: 2.2rem;
-      margin-bottom: 1rem;
-    }
-
-    .cta-section p {
-      color: rgba(255,255,255,0.8);
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-    }
-
-    .btn-cta {
-      display: inline-block;
-      background: var(--white);
-      color: var(--primary-orange);
-      padding: 0.8rem 2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .btn-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(198, 65, 12, 0.3);
-    }
-
     /* Footer */
     footer {
       background: var(--dark-charcoal);
       color: rgba(255,255,255,0.7);
       padding: 3rem 2rem 1rem;
-    }
-
-    .footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      margin-bottom: 2rem;
-    }
-
-    .footer-brand h3 {
-      color: var(--white);
-      font-size: 1.3rem;
-      margin-bottom: 1rem;
-    }
-
-    .footer-brand p {
-      font-size: 0.9rem;
-      line-height: 1.8;
-    }
-
-    .footer-links h4 {
-      color: var(--primary-orange);
-      font-size: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .footer-links ul {
-      list-style: none;
-    }
-
-    .footer-links li {
-      margin-bottom: 0.8rem;
-    }
-
-    .footer-links a {
-      color: var(--text-light);
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: color 0.3s;
-    }
-
-    .footer-links a:hover {
-      color: var(--primary-green);
-    }
-
-    .footer-bottom {
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .footer-bottom p {
-      font-size: 0.8rem;
-    }
-
-    .footer-social a {
-      display: inline-block;
-      width: 36px;
-      height: 36px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 50%;
       text-align: center;
-      line-height: 36px;
-      color: rgba(255,255,255,0.7);
-      margin-left: 0.5rem;
-      transition: background 0.3s;
     }
 
-    .footer-social a:hover {
-      background: var(--primary-green);
-      color: var(--white);
+    footer p {
+      font-size: 0.9rem;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
-      .nav-menu {
-        display: none;
-      }
-
       .hero-container {
         grid-template-columns: 1fr;
-        text-align: center;
       }
-
-      .hero-content h1 {
-        font-size: 2.2rem;
-      }
-
-      .about-container {
-        grid-template-columns: 1fr;
-      }
-
-      .footer-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .footer-bottom {
-        flex-direction: column;
-        text-align: center;
+      .nav-menu {
+        display: none;
       }
     }
   </style>
@@ -551,23 +309,40 @@
         <span class="accent">QRIS</span>
       </a>
       <ul class="nav-menu">
+        <li><a href="#pesan">Pesan QRIS</a></li>
         <li><a href="#fitur">Fitur</a></li>
-        <li><a href="#tentang">Tentang</a></li>
-        <li><a href="#qris">Metode Pembayaran</a></li>
-        <li><a href="#hubungi">Hubungi</a></li>
       </ul>
     </div>
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero" id="pesan">
     <div class="hero-container">
       <div class="hero-content">
         <h1>Sistem <span>Antrean</span> & Pembayaran QRIS</h1>
-        <p>Platform digital terpadu untuk mengelola antrean dan menerima pembayaran nirtunai melalui QRIS. Dirancang khusus untuk bisnis kuliner cepat saji.</p>
-        <a href="#fitur" class="btn-cta">Lihat Fitur</a>
+        <p>Platform digital terpadu untuk mengelola transaksi kuliner cepat saji secara nirtunai dengan Midtrans QRIS.</p>
+        <a href="#pesan" class="btn-cta">Mulai Pesan Sekarang</a>
       </div>
-      <div class="hero-badge">Edisi QRIS Integration</div>
+
+      <!-- Kotak Form Pemesanan & Pembayaran -->
+      <div class="order-box">
+        <h3>Form Pembayaran QRIS</h3>
+        <form id="paymentForm">
+          <div class="form-group">
+            <label for="customerName">Nama Pelanggan</label>
+            <input type="text" id="customerName" placeholder="Masukkan nama Anda" required>
+          </div>
+          <div class="form-group">
+            <label for="customerEmail">Email (untuk bukti transaksi)</label>
+            <input type="email" id="customerEmail" placeholder="email@domain.com" required>
+          </div>
+          <div class="form-group">
+            <label for="orderAmount">Total Harga (Rp)</label>
+            <input type="number" id="orderAmount" value="15000" min="1000" required>
+          </div>
+          <button type="submit" class="btn-pay" id="payButton">Pesan & Bayar QRIS</button>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -584,150 +359,65 @@
       </div>
       <div class="stat-item">
         <div class="stat-number">0 Menit</div>
-        <div class="stat-label">Waktu Tunggu Maksimal</div>
+        <div class="stat-label">Waktu Tunggu</div>
       </div>
-      <div class="stat-item">
-        <div class="stat-number">+50.000</div>
-        <div class="stat-label">Transaksi Bulanan</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Fitur Section -->
-  <section class="fitur-section" id="fitur">
-    <div class="section-header">
-      <h2>Fitur Utama</h2>
-      <p>Pengalaman antrean yang lebih baik dan pembayaran yang lebih cepat</p>
-    </div>
-
-    <div class="fitur-grid">
-      <div class="fitur-card">
-        <div class="icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M13.93 13.93l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M13.93 11.07l2.83-2.83"/>
-          </svg>
-        </div>
-        <h3>Manajemen Antrean Real-time</h3>
-        <p>Monitor antrean pelanggan secara live, dapatkan notifikasi otomatis, dan kurangi waktu tunggu hingga 40%.</p>
-      </div>
-
-      <div class="fitur-card">
-        <div class="icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M2 12l2.93-5.93a1.94 1.94 0 0 1 1.73.66l1.45 3.66"/>
-          </svg>
-        </div>
-        <h3>Pembayaran QRIS Cepat</h3>
-        <p>Terima pembayaran QRIS dalam hitungan detak jantung, otomatis tercatak, dan bukti pembayaran langsung terkirim.</p>
-      </div>
-
-      <div class="fitur-card">
-        <div class="icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
-          </svg>
-        </div>
-        <h3>Pelacakan Transaksi</h3>
-        <p>Riwayat lengkap semua transaksi, laporan harian/bulanan, dan monitoring performa bisnis dalam waktu nyata.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- QRIS Methods Section -->
-  <section class="qris-methods" id="qris">
-    <h2>Metode Pembayaran QRIS</h2>
-    <p>Terima pembayaran dari semua aplikasi dompet digital di Indonesia</p>
-
-    <div class="qris-grid">
-      <div class="qris-item">
-        <img src="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%237ED321'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z'/%3E%3Cpath d='M2 4.2C2 2.35 3.35 1 5.2 1h13.6c1.85 0 3.2 1.35 3.2 3.2s-1.35 3.2-3.2 3.2H5.2c-1.85 0-3.2-1.35-3.2-3.2v-1.78c0-2.3 1.86-4.16 4.1-4.16h2.16c.97 0 1.74.53 2.02 1.2l3.33 6.66c.15.31.18.67.08.98l-4.5 4.5c-.39.39-1.02.36-1.41-.08l-2.29-2.29c-.37-.37-.37-1.02 0-1.39z'/%3E%3C/svg%3E" alt="QRIS">
-        <span>QRIS</span>
-      </div>
-      <div class="qris-item">
-        <img src="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%237ED321'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z'/%3E%3Cpath d='M2 4.2C2 2.35 3.35 1 5.2 1h13.6c1.85 0 3.2 1.35 3.2 3.2s-1.35 3.2-3.2 3.2H5.2c-1.85 0-3.2-1.35-3.2-3.2v-1.78c0-2.3 1.86-4.16 4.1-4.16h2.16c.97 0 1.74.53 2.02 1.2l3.33 6.66c.15.31.18.67.08.98l-4.5 4.5c-.39.39-1.02.36-1.41-.08l-2.29-2.29c-.37-.37-.37-1.02 0-1.39z'/%3E%3C/svg%3E" alt="GoPay">
-        <span>GoPay</span>
-      </div>
-      <div class="qris-item">
-        <img src="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%237ED321'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z'/%3E%3Cpath d='M2 4.2C2 2.35 3.35 1 5.2 1h13.6c1.85 0 3.2 1.35 3.2 3.2s-1.35 3.2-3.2 3.2H5.2c-1.85 0-3.2-1.35-3.2-3.2v-1.78c0-2.3 1.86-4.16 4.1-4.16h2.16c.97 0 1.74.53 2.02 1.2l3.33 6.66c.15.31.18.67.08.98l-4.5 4.5c-.39.39-1.02.36-1.41-.08l-2.29-2.29c-.37-.37-.37-1.02 0-1.39z'/%3E%3C/svg%3E" alt="OVO">
-        <span>DANA</span>
-      </div>
-      <div class="qris-item">
-        <img src="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%237ED321'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z'/%3E%3Cpath d='M2 4.2C2 2.35 3.35 1 5.2 1h13.6c1.85 0 3.2 1.35 3.2 3.2s-1.35 3.2-3.2 3.2H5.2c-1.85 0-3.2-1.35-3.2-3.2v-1.78c0-2.3 1.86-4.16 4.1-4.16h2.16c.97 0 1.74.53 2.02 1.2l3.33 6.66c.15.31.18.67.08.98l-4.5 4.5c-.39.39-1.02.36-1.41-.08l-2.29-2.29c-.37-.37-.37-1.02 0-1.39z'/%3E%3C/svg%3E" alt="ShopeePay">
-        <span>ShopeePay</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- About Section -->
-  <section class="about-section" id="tentang">
-    <div class="about-container">
-      <div class="about-content">
-        <h3>Tentang Q-MATE QRIS</h3>
-        <p>Q-MATE QRIS adalah solusi terintegrasi antara sistem antrean digital dan pembayaran nirtunai standar Indonesia. Kami memahami tantangan pengusaha kuliner dalam menghadapi antrean yang menumpuk dan kesulitan dalam menerima pembayaran digital.</p>
-        
-        <p>Denganplatform kami, pengusaha bisa:</p>
-        <ul>
-          <li>Mengelola antrean pelanggan secara efisien tanpa antrean fisik</li>
-          <menerima pembayaran QRIS dari berbagai aplikasi dompet digital</li>
-          <li>Melacak seluruh transaksi secara real-time</li>
-          <li>Mengurangi biaya operasional hingga 30%</li>
-        </ul>
-        
-        <p>Kami didukung oleh tim pengembang berpengalaman dan sudah membantu puluhan bisnis kuliner di berbagai kota Indonesia untuk transformasi digital.</p>
-      </div>
-      <div class="about-image">
-        <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781e?w=600&h=400&fit=crop&auto=format" alt="Q-MATE QRIS System">
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="cta-section">
-    <div class="bg-overlay">
-      <h2>Mulai Mengoptimalkan Bisnismu</h2>
-      <p>Gabung lebih dari 1.500 bisnis kuliner yang sudah transformasi digital dengan Q-MATE QRIS.</p>
-      <a href="#" class="btn-cta">Daftar Sekarang Gratis</a>
     </div>
   </section>
 
   <!-- Footer -->
   <footer>
-    <div class="footer-container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <h3>Q-MATE QRIS</h3>
-          <p>Platform antrean & pembayaran digital untuk bisnis kuliner. Membantu ribuan pengusaha mengoptimalkan operasional dan meningkatkan pendapatan.</p>
-        </div>
-
-        <div class="footer-links">
-          <h4>Produk</h4>
-          <ul>
-            <li><a href="#fitur">Fitur</a></li>
-            <li><a href="#qris">Metode Pembayaran</a></li>
-            <li><a href="#tentang">Tentang Kami</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-links">
-          <h4>Resources</h4>
-          <ul>
-            <li><a href="#">Documentation</a></li>
-            <li><a href="#">API Reference</a></li>
-            <li><a href="#">Harga</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2026 Q-MATE QRIS. Hak Cipta Dilindungi.</p>
-        <div class="footer-social">
-          <a href="#">📘</a>
-          <a href="#">📸</a>
-          <a href="#">📱</a>
-        </div>
-      </div>
-    </div>
+    <p>&copy; 2026 Q-MATE QRIS. Hak Cipta Dilindungi.</p>
   </footer>
+
+  <!-- Script untuk Menghubungkan Frontend ke Backend Vercel -->
+  <script>
+    document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('customerName').value;
+      const email = document.getElementById('customerEmail').value;
+      const amount = document.getElementById('orderAmount').value;
+      const payButton = document.getElementById('payButton');
+
+      payButton.textContent = "Menghubungkan ke Server...";
+      payButton.disabled = true;
+
+      try {
+        // Mengirim request ke backend Express Vercel
+        const response = await fetch('/api/charge', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            amount: parseInt(amount)
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("QRIS berhasil dibuat! Silakan lanjutkan pembayaran.");
+          // Jika backend mengembalikan URL redirect Midtrans Snap/QRIS
+          if (result.redirect_url) {
+            window.location.href = result.redirect_url;
+          } else if (result.qr_string) {
+            console.log("QR String:", result.qr_string);
+          }
+        } else {
+          alert("Gagal memproses pembayaran: " + (result.message || "Kesalahan server"));
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Gagal terhubung ke server Vercel. Periksa koneksi atau endpoint backend.");
+      } finally {
+        payButton.textContent = "Pesan & Bayar QRIS";
+        payButton.disabled = false;
+      }
+    });
+  </script>
 
 </body>
 </html>
