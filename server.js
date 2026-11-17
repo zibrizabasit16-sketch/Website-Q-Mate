@@ -1,15 +1,17 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const midtransClient = require('midtrans-client');
 
 const app = express();
-// Tangkap port dari environment Railway secara langsung, fallback ke 8080
 const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Menyajikan file statis dari folder utama (tempat index.html berada)
 app.use(express.static(__dirname));
 
 // Inisialisasi Midtrans Snap API
@@ -17,6 +19,11 @@ const snap = new midtransClient.Snap({
   isProduction: true,
   serverKey: process.env.MIDTRANS_SERVER_KEY || '',
   clientKey: process.env.MIDTRANS_CLIENT_KEY || ''
+});
+
+// Route utama untuk melayani index.html secara langsung
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Health check endpoint
@@ -49,7 +56,7 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
-// Server Listener menggunakan port dinamis Railway
+// Server Listener
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Q-MATE Backend running on port ${PORT}`);
 });
