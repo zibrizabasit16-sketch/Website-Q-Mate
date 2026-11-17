@@ -4,23 +4,30 @@ const cors = require('cors');
 const midtransClient = require('midtrans-client');
 
 const app = express();
-
-// Port wajib mengikuti environment Railway secara mutlak
 const PORT = process.env.PORT || 3000;
+
+// Penangkap error tak terduga agar server tidak crash diam-diam
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION:', reason);
+});
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Inisialisasi Midtrans Snap API menggunakan Environment Variables dari Railway
+// Inisialisasi Midtrans Snap API
 const snap = new midtransClient.Snap({
   isProduction: true,
   serverKey: process.env.MIDTRANS_SERVER_KEY || '',
   clientKey: process.env.MIDTRANS_CLIENT_KEY || ''
 });
 
-// 1. Endpoint API untuk membuat transaksi & Snap Token Midtrans
+// Endpoint API Transaksi Midtrans
 app.post('/api/transactions', async (req, res) => {
   try {
     const { customerName, customerEmail, totalAmount, orderId, items } = req.body;
@@ -65,24 +72,18 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
-// 2. Health check endpoint untuk memantau status server
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'Q-MATE Backend Active' });
 });
 
-// 3. Sajikan seluruh file statis (index.html, aset, dll)
+// Sajikan file statis & fallback index.html
 app.use(express.static(path.join(__dirname)));
 
-// 4. Route fallback utama untuk merender index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Jalankan Server
-const server = app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Q-MATE Server is successfully running on port ${PORT}`);
-});
-
-server.on('error', (err) => {
-  console.error('Server failed to start:', err);
 });
