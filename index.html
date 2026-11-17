@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Midtrans Snap SDK -->
-  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-oboTEbTlj1tqM8--"></script>
+  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-3tQd95f6XZzjDDRK"></script>
   <style>
     :root {
       --primary: #C2410C;
@@ -439,7 +439,7 @@
   <header class="app-header">
     <div class="header-row">
       <div class="header-left">
-        <button class="btn-back" onclick="history.back()">←</button>
+        <button class="btn-back" onclick="resetToMenu()">←</button>
         <div class="brand">
           <img src="assets/logo-qmate.jpeg" alt="Q-MATE Logo" class="brand-img" onerror="this.style.display='none'">
         </div>
@@ -454,35 +454,32 @@
   <div class="search-bar">
     <div class="search-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input type="text" placeholder="Cari rasa favoritmu...">
+      <input type="text" placeholder="Cari varian piscok...">
     </div>
   </div>
 
   <!-- Filter Tabs -->
   <div class="filters">
-    <button class="filter-chip active" onclick="setFilter(this,'all')">Semua</button>
+    <button class="filter-chip active" onclick="setFilter(this,'all')">Semua Menu</button>
     <button class="filter-chip" onclick="setFilter(this,'original')">Original</button>
-    <button class="filter-chip" onclick="setFilter(this,'keju')">Keju</button>
-    <button class="filter-chip" onclick="setFilter(this,'tiramisu')">Tiramisu</button>
-    <button class="filter-chip" onclick="setFilter(this,'taro')">Taro</button>
-    <button class="filter-chip" onclick="setFilter(this,'macha')">Macha</button>
+    <button class="filter-chip" onclick="setFilter(this,'crunchy')">With Crunchy</button>
   </div>
 
   <!-- Menu Grid -->
   <section class="menu-section" id="menu-section">
     <div class="menu-grid">
-      <!-- Original -->
+      <!-- Piscok Original -->
       <div class="menu-card" data-category="original">
         <span class="menu-badge">Rasa Populer</span>
         <div class="menu-image">
-          <img src="images/original.jpg" alt="Original">
+          <img src="images/original.jpg" alt="Piscok Original">
         </div>
         <div class="menu-content">
           <div class="menu-row">
-            <h3>Original (Isi 5)</h3>
+            <h3>Piscok Original</h3>
             <div class="menu-price">Rp 10.000</div>
           </div>
-          <p class="menu-desc">Pisang gulung krispi original nan renyah.</p>
+          <p class="menu-desc">Pisang gulung krispi original nan renyah dan lumer.</p>
           <div class="qty-control">
             <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <span class="qty-val">1</span>
@@ -492,81 +489,18 @@
         </div>
       </div>
 
-      <!-- Keju -->
-      <div class="menu-card" data-category="keju">
-        <span class="menu-badge">Favorit</span>
+      <!-- Piscok With Crunchy -->
+      <div class="menu-card" data-category="crunchy">
+        <span class="menu-badge best">Favorit</span>
         <div class="menu-image">
-          <img src="images/keju.jpg" alt="Keju">
+          <img src="images/crunchy.jpg" alt="Piscok With Crunchy">
         </div>
         <div class="menu-content">
           <div class="menu-row">
-            <h3>Keju</h3>
-            <div class="menu-price">Rp 10.000</div>
+            <h3>Piscok With Crunchy</h3>
+            <div class="menu-price">Rp 13.000</div>
           </div>
-          <p class="menu-desc">Pisang gulung krispi dengan taburan keju melimpah.</p>
-          <div class="qty-control">
-            <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
-            <span class="qty-val">1</span>
-            <button class="qty-btn" onclick="changeQty(this,1)">+</button>
-          </div>
-          <button class="btn-add" onclick="addCart(this)">Masukkan ke Keranjang</button>
-        </div>
-      </div>
-
-      <!-- Tiramisu -->
-      <div class="menu-card" data-category="tiramisu">
-        <span class="menu-badge best">Best Seller</span>
-        <div class="menu-image">
-          <img src="images/tiramisu.jpg" alt="Tiramisu">
-        </div>
-        <div class="menu-content">
-          <div class="menu-row">
-            <h3>Tiramisu</h3>
-            <div class="menu-price">Rp 10.000</div>
-          </div>
-          <p class="menu-desc">Pisang gulung krispi rasa tiramisu klasik.</p>
-          <div class="qty-control">
-            <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
-            <span class="qty-val">1</span>
-            <button class="qty-btn" onclick="changeQty(this,1)">+</button>
-          </div>
-          <button class="btn-add" onclick="addCart(this)">Masukkan ke Keranjang</button>
-        </div>
-      </div>
-
-      <!-- Taro -->
-      <div class="menu-card" data-category="taro">
-        <span class="menu-badge">Unik</span>
-        <div class="menu-image">
-          <img src="images/taro.jpg" alt="Taro">
-        </div>
-        <div class="menu-content">
-          <div class="menu-row">
-            <h3>Taro</h3>
-            <div class="menu-price">Rp 10.000</div>
-          </div>
-          <p class="menu-desc">Pisang gulung krispi dengan rasa taro yang unik.</p>
-          <div class="qty-control">
-            <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
-            <span class="qty-val">1</span>
-            <button class="qty-btn" onclick="changeQty(this,1)">+</button>
-          </div>
-          <button class="btn-add" onclick="addCart(this)">Masukkan ke Keranjang</button>
-        </div>
-      </div>
-
-      <!-- Macha -->
-      <div class="menu-card" data-category="macha">
-        <span class="menu-badge best">Best Seller</span>
-        <div class="menu-image">
-          <img src="images/macha.jpg" alt="Macha">
-        </div>
-        <div class="menu-content">
-          <div class="menu-row">
-            <h3>Macha</h3>
-            <div class="menu-price">Rp 10.000</div>
-          </div>
-          <p class="menu-desc">Pisang gulung krispi dengan matcha premium.</p>
+          <p class="menu-desc">Piscok lumer dengan tambahan topping crunchy di luar.</p>
           <div class="qty-control">
             <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <span class="qty-val">1</span>
@@ -715,6 +649,29 @@
     let cart = [];
     let ordersList = [];
 
+    const API_BASE_URL = 'https://website-q-mate-production.up.railway.app/';
+
+    function resetToMenu() {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.getElementById('nav-menu').classList.add('active');
+      
+      closeCartModal();
+      closeOrderModal();
+      closeAccountModal();
+      closeAdminPanel();
+      
+      document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+      const firstChip = document.querySelector('.filter-chip');
+      if (firstChip) firstChip.classList.add('active');
+      
+      document.querySelectorAll('.menu-card').forEach(card => card.style.display = 'flex');
+      
+      const searchInput = document.querySelector('.search-wrap input');
+      if (searchInput) searchInput.value = '';
+
+      showToast('Kembali ke menu utama', 'success');
+    }
+
     function changeQty(btn, delta) {
       const qtyVal = btn.parentElement.querySelector('.qty-val');
       let currentQty = parseInt(qtyVal.textContent) || 1;
@@ -840,7 +797,6 @@
       totalEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
     }
 
-    // ================= CHECKOUT KE DOMAIN VERCEL YANG BENAR =================
     function proceedToCheckout() {
       if (cart.length === 0) {
         showToast('Keranjang masih kosong.', 'warning');
@@ -861,7 +817,7 @@
 
       const totalAmount = cart.reduce((sum, item) => sum + item.harga * item.qty, 0);
 
-      fetch('https://qmate-backend.vercel.app/api/create-transaction', {
+      fetch(`${API_BASE_URL}/api/transactions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -897,7 +853,7 @@
 
               ordersList.unshift(newOrder);
 
-              fetch('https://qmate-backend.vercel.app/api/create-transaction', {
+              fetch(`${API_BASE_URL}/api/transactions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -935,7 +891,7 @@
       })
       .catch(err => {
         processingModal.classList.remove('open');
-        showToast('Gagal terhubung ke server Vercel.', 'error');
+        showToast('Gagal terhubung ke server lokal.', 'error');
       });
     }
 
@@ -1091,6 +1047,19 @@
       this.classList.add('active');
       openAccountModal();
     });
+
+    // Explicit global binding
+    window.addCart = addCart;
+    window.openCartModal = openCartModal;
+    window.closeCartModal = closeCartModal;
+    window.changeQty = changeQty;
+    window.updateCartBadge = updateCartBadge;
+    window.renderCart = renderCart;
+    window.removeFromCart = removeFromCart;
+    window.updateCartQty = updateCartQty;
+    window.proceedToCheckout = proceedToCheckout;
+    window.showToast = showToast;
+    window.resetToMenu = resetToMenu;
   </script>
 </body>
 </html>
