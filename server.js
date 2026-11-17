@@ -6,14 +6,8 @@ const morgan = require('morgan');
 const transactionRoutes = require('./routes/transactionRoutes');
 const { errorHandler } = require('./middleware/errorHandler');
 
-// --- 1. IMPORT KODE KONEKSI DATABASE ---
-const connectDB = require('./config/db');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// --- 2. JALANKAN KONEKSI DATABASE ---
-connectDB();
 
 // Security & Middleware
 app.use(helmet({
@@ -31,7 +25,7 @@ app.use(express.static(__dirname));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Q-MATE Backend', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', service: 'Q-MATE Backend (Local Memory)', timestamp: new Date().toISOString() });
 });
 
 // Routes
@@ -45,7 +39,7 @@ app.use((req, res) => {
 // Global error handler
 app.use(errorHandler);
 
-// --- 3. FIX RAILWAY STARTUP LISTENER ---
+// Railway Safe Server Listener
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Q-MATE Backend running on port ${PORT}`);
 });
