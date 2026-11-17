@@ -3,8 +3,8 @@ const cors = require('cors');
 const midtransClient = require('midtrans-client');
 
 const app = express();
-// Gunakan port dinamis dari Railway (process.env.PORT), fallback ke 3000
-const PORT = process.env.PORT || 3000;
+// Tangkap port dari environment Railway secara langsung, fallback ke 8080
+const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors());
@@ -49,7 +49,7 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
-// Server Listener wajib pakai process.env.PORT
+// Server Listener menggunakan port dinamis Railway
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Q-MATE Backend running on port ${PORT}`);
 });
