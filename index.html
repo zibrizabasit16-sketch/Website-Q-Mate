@@ -514,8 +514,10 @@
       .then(res => res.json())
       .then(data => {
         procModal.classList.remove('open');
-        if (data.success && data.data && data.data.snapToken) {
-          window.snap.pay(data.data.snapToken, {
+        const token = (data && data.data && data.data.snapToken) ? data.data.snapToken : null;
+
+        if (token && window.snap && typeof window.snap.pay === 'function') {
+          window.snap.pay(token, {
             enabled_payments: ['gopay', 'other_qris'],
             onSuccess: function() {
               completeOrder(name, email, itemsSnapshot, total);
@@ -534,7 +536,8 @@
             }
           });
         } else {
-          throw new Error('Fallback ke mode antrean lokal');
+          completeOrder(name, email, itemsSnapshot, total);
+          showToast('Pesanan berhasil masuk antrean.');
         }
       })
       .catch(() => {
