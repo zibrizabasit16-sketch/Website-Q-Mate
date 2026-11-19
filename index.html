@@ -325,8 +325,8 @@
   <!-- Checkout Processing Modal -->
   <div class="modal-overlay" id="checkoutProcessingModal">
     <div class="modal" style="text-align: center; max-width: 340px;">
-      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem;">Memproses Pesanan</h3>
-      <p id="checkoutStatus" style="font-size: 0.85rem; color: var(--gray-text);">Menyiapkan antrean pesanan...</p>
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem;">Memproses Pembayaran</h3>
+      <p id="checkoutStatus" style="font-size: 0.85rem; color: var(--gray-text);">Menghubungkan ke Midtrans...</p>
     </div>
   </div>
 
@@ -511,41 +511,48 @@
           items: itemsSnapshot.map(item => ({ name: item.nama, price: item.harga, qty: item.qty }))
         })
       })
-      .then(res => res.json())
-      .then(data => {
-        procModal.classList.remove('open');
-        const token = (data && data.data && data.data.snapToken) ? data.data.snapToken : null;
-
-        if (token && window.snap && typeof window.snap.pay === 'function') {
-          window.snap.pay(token, {
-            enabled_payments: ['gopay', 'other_qris'],
-            onSuccess: function() {
-              completeOrder(name, email, itemsSnapshot, total);
-              showToast('Pembayaran berhasil. Pesanan masuk antrean.');
-            },
-            onPending: function() {
-              completeOrder(name, email, itemsSnapshot, total);
-              showToast('Pesanan dicatat. Menunggu penyelesaian pembayaran.');
-            },
-            onError: function() {
-              completeOrder(name, email, itemsSnapshot, total);
-              showToast('Pesanan dicatat ke antrean lokal.');
-            },
-            onClose: function() {
-              showToast('Jendela pembayaran ditutup.');
-            }
-          });
-        } else {
-          completeOrder(name, email, itemsSnapshot, total);
-          showToast('Pesanan berhasil masuk antrean.');
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.message || `HTTP ${res.status}`);
         }
+        return data;
       })
-      .catch(() => {
-        setTimeout(() => {
-          procModal.classList.remove('open');
-          completeOrder(name, email, itemsSnapshot, total);
-          showToast('Pesanan berhasil masuk antrean.');
-        }, 700);
+      .then((data) => {
+        procModal.classList.remove('open');
+        const token = data && data.data && data.data.snapToken ? data.data.snapToken : null;
+
+        if (!token) {
+          showToast('Snap token tidak diterima dari server.');
+          return;
+        }
+
+        if (!window.snap || typeof window.snap.pay !== 'function') {
+          showToast('SDK Midtrans Snap belum termuat.');
+          return;
+        }
+
+        window.snap.pay(token, {
+          enabled_payments: ['gopay', 'other_qris'],
+          onSuccess: function() {
+            completeOrder(name, email, itemsSnapshot, total);
+            showToast('Pembayaran berhasil. Pesanan masuk antrean.');
+          },
+          onPending: function() {
+            completeOrder(name, email, itemsSnapshot, total);
+            showToast('Menunggu pembayaran. Pesanan dicatat ke antrean.');
+          },
+          onError: function() {
+            showToast('Pembayaran gagal diproses.');
+          },
+          onClose: function() {
+            showToast('Jendela pembayaran ditutup sebelum selesai.');
+          }
+        });
+      })
+      .catch((err) => {
+        procModal.classList.remove('open');
+        showToast(`Gagal memulai pembayaran: ${err.message || 'Cek koneksi backend'}`);
       });
     }
 
