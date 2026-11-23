@@ -533,13 +533,12 @@
         }
 
         window.snap.pay(token, {
-          enabled_payments: ['gopay', 'other_qris'],
-          onSuccess: function() {
-            completeOrder(name, email, itemsSnapshot, total);
+          onSuccess: function(res) {
+            completeOrder(name, email, itemsSnapshot, total, data.data && data.data.orderId ? data.data.orderId : (res && res.order_id));
             showToast('Pembayaran berhasil. Pesanan masuk antrean.');
           },
-          onPending: function() {
-            completeOrder(name, email, itemsSnapshot, total);
+          onPending: function(res) {
+            completeOrder(name, email, itemsSnapshot, total, data.data && data.data.orderId ? data.data.orderId : (res && res.order_id));
             showToast('Menunggu pembayaran. Pesanan dicatat ke antrean.');
           },
           onError: function() {
@@ -556,10 +555,10 @@
       });
     }
 
-    function completeOrder(name, email, itemsSnapshot, total) {
+    function completeOrder(name, email, itemsSnapshot, total, customOrderId = null) {
       const qNum = String(ordersList.length + 1).padStart(3, '0');
       ordersList.unshift({
-        orderId: 'QMATE-' + qNum + '-' + Date.now().toString().slice(-4),
+        orderId: customOrderId || ('QMATE-' + qNum + '-' + Date.now().toString().slice(-4)),
         queueNumber: qNum,
         customerName: name,
         customerEmail: email,
