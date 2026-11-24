@@ -251,8 +251,8 @@
         </div>
         <div class="menu-content">
           <div class="menu-row">
-            <h3>Piscok Original (Isi 3)</h3>
-            <div class="menu-price">Rp 10.000</div>
+            <h3>Piscok Original (isi 3)</h3>
+            <div class="menu-price">Rp 1</div>
           </div>
           <p class="menu-desc">Pisang gulung krispi original nan renyah dengan lumeran cokelat asli di dalamnya.</p>
           <div class="card-actions">
@@ -270,12 +270,12 @@
       <div class="menu-card" data-category="crunchy">
         <span class="menu-badge">Favorit</span>
         <div class="menu-image">
-          <img src="images/collins.jpg" alt="Piscok With Crunchy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1624371414401-f6184f706a9d?auto=format&fit=crop&w=800&q=80';">
+          <img src="images/crunchy.jpg" alt="Piscok With Crunchy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1624371414401-f6184f706a9d?auto=format&fit=crop&w=800&q=80';">
         </div>
         <div class="menu-content">
           <div class="menu-row">
             <h3>Piscok With Crunchy (isi 3)</h3>
-            <div class="menu-price">Rp 1</div>
+            <div class="menu-price">Rp 15.000</div>
           </div>
           <p class="menu-desc">Piscok lumer dengan tambahan topping crunchy di luar.</p>
           <div class="card-actions">
@@ -388,6 +388,110 @@
     let cart = [];
     let ordersList = [];
     const API_BASE_URL = 'https://website-q-mate-production.up.railway.app';
+    const STORAGE_KEY = 'qmate_orders_record_v1';
+
+    function loadLocalOrders() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveLocalOrders(list) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch {}
+    }
+
+    function normalizeOrder(raw, index = 0) {
+      const created = raw.createdAt ? new Date(raw.createdAt) : new Date();
+      const dateStr = raw.date || created.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+      const timeStr = raw.time || created.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }).replace(':', '.');
+
+      const qNum = raw.queueNumber || String(index + 1).padStart(3, '0');
+      return {
+        orderId: raw.orderId || ('QMATE-' + qNum + '-' + created.getTime().toString().slice(-4)),
+        queueNumber: qNum,
+        customerName: raw.customerName || 'Pelanggan Q-MATE',
+        customerEmail: raw.customerEmail || 'pelanggan@qmate.com',
+        items: Array.isArray(raw.items) ? raw.items : [],
+        totalAmount: Number(raw.totalAmount) || 0,
+        date: dateStr,
+        time: timeStr,
+        status: raw.status === 'Selesai' ? 'Selesai' : 'Diproses'
+      };
+    }
+
+    function mergeOrders(serverOrders, localOrders) {
+      const map = new Map();
+      [...serverOrders, ...localOrders].forEach((item, idx) => {
+        const norm = normalizeOrder(item, idx);
+        const existing = map.get(norm.orderId);
+        if (!existing) {
+          map.set(norm.orderId, norm);
+        } else {
+          if (existing.status === 'Selesai' || norm.status === 'Selesai') {
+            existing.status = 'Selesai';
+          }
+        }
+      });
+
+      const merged = Array.from(map.values()).sort((a, b) => b.orderId.localeCompare(a.orderId));
+      merged.slice().reverse().forEach((item, i) => {
+        item.queueNumber = String(i + 1).padStart(3, '0');
+      });
+      return merged;
+    }
+
+    async function syncOrdersFromBackend() {
+      const local = loadLocalOrders();
+      ordersList = mergeOrders([], local);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/orders`, { method: 'GET' });
+        if (!res.ok) return ordersList;
+        const data = await res.json().catch(() => ({}));
+        const remoteList = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+        ordersList = mergeOrders(remoteList, local);
+        saveLocalOrders(ordersList);
+      } catch {}
+      return ordersList;
+    }
+
+    async function persistOrderToBackend(orderObj) {
+      ordersList = mergeOrders([orderObj], ordersList);
+      saveLocalOrders(ordersList);
+      try {
+        await fetch(`${API_BASE_URL}/api/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderObj)
+        });
+      } catch {}
+    }
+
+    async function updateOrderStatusOnBackend(orderId, status) {
+      ordersList = ordersList.map(item => item.orderId === orderId ? { ...item, status } : item);
+      saveLocalOrders(ordersList);
+      try {
+        await fetch(`${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+      } catch {}
+    }
+
+    syncOrdersFromBackend();
 
     function switchNav(target) {
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -446,7 +550,11 @@
       document.getElementById('cartModal').classList.add('open');
     }
     function closeCartModal() { document.getElementById('cartModal').classList.remove('open'); }
-    function openOrderModal() { renderOrders(); document.getElementById('orderModal').classList.add('open'); }
+    async function openOrderModal() {
+      await syncOrdersFromBackend();
+      renderOrders();
+      document.getElementById('orderModal').classList.add('open');
+    }
     function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); switchNav('menu'); }
     function openAccountModal() { document.getElementById('accountModal').classList.add('open'); }
     function closeAccountModal() { document.getElementById('accountModal').classList.remove('open'); switchNav('menu'); }
@@ -456,11 +564,12 @@
       document.getElementById('pinModal').classList.add('open');
     }
     function closePinModal() { document.getElementById('pinModal').classList.remove('open'); }
-    function closeAdminPanel() { document.getElementById('adminModal').classList.remove('open'); }
+    function closeAdminPanel() { document.getElementById('adminModal').classList.remove('open'); switchNav('menu'); }
 
-    function verifyPin() {
+    async function verifyPin() {
       if (document.getElementById('adminPinInput').value === '1234') {
         closePinModal();
+        await syncOrdersFromBackend();
         renderAdminOrders();
         document.getElementById('adminModal').classList.add('open');
       } else {
@@ -521,6 +630,7 @@
       .then((data) => {
         procModal.classList.remove('open');
         const token = data && data.data && data.data.snapToken ? data.data.snapToken : null;
+        const orderIdFromServer = (data && data.data && data.data.orderId) ? data.data.orderId : null;
 
         if (!token) {
           showToast('Snap token tidak diterima dari server.');
@@ -533,13 +643,13 @@
         }
 
         window.snap.pay(token, {
-          onSuccess: function(res) {
-            completeOrder(name, email, itemsSnapshot, total, data.data && data.data.orderId ? data.data.orderId : (res && res.order_id));
-            showToast('Pembayaran berhasil. Pesanan masuk antrean.');
+          onSuccess: async function(res) {
+            await completeOrder(name, email, itemsSnapshot, total, orderIdFromServer || (res && res.order_id));
+            showToast('Pembayaran berhasil. Pesanan terdata.');
           },
-          onPending: function(res) {
-            completeOrder(name, email, itemsSnapshot, total, data.data && data.data.orderId ? data.data.orderId : (res && res.order_id));
-            showToast('Menunggu pembayaran. Pesanan dicatat ke antrean.');
+          onPending: async function(res) {
+            await completeOrder(name, email, itemsSnapshot, total, orderIdFromServer || (res && res.order_id));
+            showToast('Menunggu pembayaran. Pesanan terdata.');
           },
           onError: function() {
             showToast('Pembayaran gagal diproses.');
@@ -555,18 +665,23 @@
       });
     }
 
-    function completeOrder(name, email, itemsSnapshot, total, customOrderId = null) {
-      const qNum = String(ordersList.length + 1).padStart(3, '0');
-      ordersList.unshift({
-        orderId: customOrderId || ('QMATE-' + qNum + '-' + Date.now().toString().slice(-4)),
-        queueNumber: qNum,
+    async function completeOrder(name, email, itemsSnapshot, total, customOrderId = null) {
+      const now = new Date();
+      const nextNum = String(ordersList.length + 1).padStart(3, '0');
+      const orderObj = normalizeOrder({
+        orderId: customOrderId || ('QMATE-' + nextNum + '-' + now.getTime().toString().slice(-4)),
+        queueNumber: nextNum,
         customerName: name,
         customerEmail: email,
         items: itemsSnapshot,
         totalAmount: total,
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        createdAt: now.toISOString(),
+        date: now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+        time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
         status: 'Diproses'
-      });
+      }, ordersList.length);
+
+      await persistOrderToBackend(orderObj);
       cart = [];
       updateCartBadge();
     }
@@ -586,7 +701,7 @@
             <b style="font-size:1.05rem; color:var(--dark);">Antrean #${o.queueNumber}</b>
             <span style="font-size:0.8rem; font-weight:800; background:${badgeBg}; color:${badgeColor}; padding:0.2rem 0.65rem; border-radius:var(--radius-pill);">${o.status}</span>
           </div>
-          <div style="font-size:0.8rem; color:var(--gray-text); margin-bottom:0.25rem;">ID: <b>${o.orderId}</b> • Jam ${o.time}</div>
+          <div style="font-size:0.8rem; color:var(--gray-text); margin-bottom:0.25rem;">ID: <b>${o.orderId}</b> • ${o.date} • Jam ${o.time}</div>
           <div style="font-size:0.85rem; color:var(--gray-text); margin-bottom:0.65rem;">Pelanggan: <b>${o.customerName}</b> (${o.customerEmail})</div>
           <div style="background:white; padding:0.75rem; border-radius:8px; border:1px solid var(--border); margin-bottom:0.75rem;">
             ${o.items.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:700; color:var(--dark); margin-bottom:0.25rem;"><span>${i.nama}</span><span>x${i.qty} (Rp ${(i.harga * i.qty).toLocaleString('id-ID')})</span></div>`).join('')}
@@ -599,11 +714,11 @@
       `;
     }
 
-    function markOrderDone(orderId) {
+    async function markOrderDone(orderId) {
+      await updateOrderStatusOnBackend(orderId, 'Selesai');
+      renderAdminOrders();
       const target = ordersList.find(item => item.orderId === orderId);
       if (target) {
-        target.status = 'Selesai';
-        renderAdminOrders();
         showToast(`Antrean #${target.queueNumber} ditandai selesai.`);
       }
     }
