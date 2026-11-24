@@ -252,7 +252,7 @@
         <div class="menu-content">
           <div class="menu-row">
             <h3>Piscok Original</h3>
-            <div class="menu-price">Rp 1</div>
+            <div class="menu-price">Rp 10.000</div>
           </div>
           <p class="menu-desc">Pisang gulung krispi original nan renyah dengan lumeran cokelat asli di dalamnya.</p>
           <div class="card-actions">
@@ -330,7 +330,7 @@
     </div>
   </div>
 
-  <!-- Order Status Modal -->
+  <!-- Order Status Modal (POV Pembeli) -->
   <div class="modal-overlay" id="orderModal">
     <div class="modal">
       <button class="modal-close" onclick="closeOrderModal()">x</button>
@@ -359,7 +359,7 @@
     </div>
   </div>
 
-  <!-- Admin Dashboard Modal -->
+  <!-- Admin Dashboard Modal (POV Penjual) -->
   <div class="modal-overlay" id="adminModal">
     <div class="modal" style="max-width: 560px;">
       <button class="modal-close" onclick="closeAdminPanel()">x</button>
@@ -392,6 +392,31 @@
 
     const API_BASE_URL = 'https://website-q-mate-production.up.railway.app';
     const STORAGE_KEY = 'qmate_orders_record_v1';
+    const BUYER_ORDERS_KEY = 'qmate_my_order_ids_v1';
+
+    function loadBuyerOrderIds() {
+      try {
+        const raw = localStorage.getItem(BUYER_ORDERS_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveBuyerOrderId(orderId) {
+      if (!orderId) return;
+      try {
+        const current = loadBuyerOrderIds();
+        current.add(orderId);
+        localStorage.setItem(BUYER_ORDERS_KEY, JSON.stringify(Array.from(current)));
+      } catch {}
+    }
+
+    function getBuyerOrders() {
+      const myIds = loadBuyerOrderIds();
+      return ordersList.filter(o => myIds.has(o.orderId));
+    }
 
     function loadLocalOrders() {
       try {
@@ -469,6 +494,7 @@
     }
 
     async function persistOrderToBackend(orderObj) {
+      saveBuyerOrderId(orderObj.orderId);
       ordersList = mergeOrders([orderObj], ordersList);
       saveLocalOrders(ordersList);
       knownOrderIds.add(orderObj.orderId);
@@ -515,7 +541,7 @@
       const newOrders = ordersList.filter(o => !knownOrderIds.has(o.orderId));
       ordersList.forEach(o => knownOrderIds.add(o.orderId));
 
-      if (hadKnown && newOrders.length > 0) {
+      if (hadKnown && newOrders.length > 0 && isAdminPanelOpen) {
         const latest = newOrders[0];
         playNewOrderBeep();
         showToast(`Pesanan baru masuk: Antrean #${latest.queueNumber} (${latest.customerName})`);
@@ -773,11 +799,12 @@
 
     function renderOrders() {
       const c = document.getElementById('orderContent');
-      if (ordersList.length === 0) {
-        c.innerHTML = '<p style="text-align:center; color:var(--gray-text); padding:2rem;">Belum ada pesanan aktif.</p>';
+      const buyerOrders = getBuyerOrders();
+      if (buyerOrders.length === 0) {
+        c.innerHTML = '<p style="text-align:center; color:var(--gray-text); padding:2rem;">Belum ada pesanan aktif di perangkat ini.</p>';
         return;
       }
-      c.innerHTML = ordersList.map(o => renderOrderCard(o, false)).join('');
+      c.innerHTML = buyerOrders.map(o => renderOrderCard(o, false)).join('');
     }
 
     function renderAdminOrders() {
