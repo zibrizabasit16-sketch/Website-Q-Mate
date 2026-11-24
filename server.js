@@ -203,6 +203,32 @@ app.patch('/api/orders/:orderId', (req, res) => {
   res.json({ success: true, data: target });
 });
 
+// Reset semua data pesanan ke #001 setelah validasi PIN rahasia
+app.post('/api/orders/reset', (req, res) => {
+  try {
+    const { resetPin } = req.body || {};
+    const validResetPin = String(process.env.RESET_PIN || '9988').trim();
+
+    if (!resetPin || String(resetPin).trim() !== validResetPin) {
+      return res.status(401).json({
+        success: false,
+        message: 'PIN rahasia reset salah'
+      });
+    }
+
+    writeOrders([]);
+    return res.json({
+      success: true,
+      message: 'Antrean berhasil direset ke #001'
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal mereset antrean'
+    });
+  }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
