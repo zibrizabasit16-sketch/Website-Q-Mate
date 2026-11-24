@@ -1,84 +1,195 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
-const midtransClient = require('midtrans-client');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 
-// Inisialisasi Midtrans Snap API
-const snap = new midtransClient.Snap({
-  isProduction: true,
-  serverKey: process.env.MIDTRANS_SERVER_KEY || '',
-  clientKey: process.env.MIDTRANS_CLIENT_KEY || ''
+// CORS agar akses antar-tab/perangkat aman
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
 });
 
-console.log('✨ Midtrans Snap diinisialisasi (isProduction: true)');
+// Penyimpanan permanen pesanan di server Railway (tanpa endpoint hapus)
+const ORDERS_FILE = path.join(__dirname, 'orders-data.json');
 
-// Endpoint API Transaksi (Langsung aktif tanpa file tambahan)
+function readOrders() {
+  try {
+    if (!fs.existsSync(ORDERS_FILE)) {
+      fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
+    const raw = fs.readFileSync(ORDERS_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function writeOrders(orders) {
+  fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
+}
+
+// Endpoint transaksi Midtrans Snap (sesuaikan MIDTRANS_SERVER_KEY di Environment Variables Railway)
 app.post('/api/transactions', async (req, res) => {
   try {
-    const { customerName, customerEmail, totalAmount, orderId, items } = req.body;
-    
-    const transactionOrderId = orderId || `QMATE-${Date.now()}`;
-    const grossAmount = parseInt(totalAmount) || 10000;
+    const { customerName, customerEmail, totalAmount, booth, items } = req.body || {};
+    const serverKey = process.env.MIDTRANS_SERVER_KEY;
 
-    const parameter = {
+    if (!serverKey) {
+      return res.status(500).json({
+        success: false,
+        message: 'MIDTRANS_SERVER_KEY belum diatur di Railway'
+      });
+    }
+
+    const grossAmount = Math.round(Number(totalAmount) || 0);
+    if (grossAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Total pembayaran tidak valid'
+      });
+    }
+
+    const orderId = 'QMATE-' + Date.now() + '-' + Math.floor(100 + Math.random() * 900);
+    const isProduction = !serverKey.startsWith('SB-');
+    const snapUrl = isProduction
+      ? 'https://app.midtrans.com/snap/v1/transactions'
+      : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+
+    const authHeader = 'Basic ' + Buffer.from(serverKey + ':').toString('base64');
+
+    const itemDetails = Array.isArray(items) && items.length > 0
+      ? items.map((it, idx) => ({
+          id: 'ITEM-' + (idx + 1),
+          price: Math.round(Number(it.price) || 0),
+          quantity: Math.max(1, Math.round(Number(it.qty) || 1)),
+          name: String(it.name || 'Menu Q-MATE').slice(0, 50)
+        }))
+      : [{
+          id: 'ITEM-1',
+          price: grossAmount,
+          quantity: 1,
+          name: 'Pesanan Q-MATE'
+        }];
+
+    const payload = {
       transaction_details: {
-        order_id: transactionOrderId,
+        order_id: orderId,
         gross_amount: grossAmount
       },
       customer_details: {
-        first_name: customerName || 'Pelanggan Q-MATE',
-        email: customerEmail || 'pelanggan@qmate.com'
+        first_name: String(customerName || 'Pelanggan Q-MATE').slice(0, 50),
+        email: String(customerEmail || 'pelanggan@qmate.com')
       },
-      item_details: items ? items.map(item => ({
-        id: item.name.replace(/\s+/g, '-').toLowerCase(),
-        price: item.price,
-        quantity: item.qty,
-        name: item.name
-      })) : []
+      item_details: itemDetails,
+      custom_field1: booth || 'B-04'
     };
 
-    const transaction = await snap.createTransaction(parameter);
-    
-    res.json({
+    const midtransRes = await fetch(snapUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': authHeader
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const midtransData = await midtransRes.json().catch(() => ({}));
+
+    if (!midtransRes.ok || !midtransData.token) {
+      return res.status(midtransRes.status || 400).json({
+        success: false,
+        message: (midtransData.error_messages && midtransData.error_messages[0]) || midtransData.message || 'Gagal membuat transaksi Midtrans'
+      });
+    }
+
+    return res.json({
       success: true,
-      message: 'Snap Token berhasil dibuat',
       data: {
-        snapToken: transaction.token,
-        redirectUrl: transaction.redirect_url,
-        orderId: transactionOrderId
+        orderId,
+        snapToken: midtransData.token,
+        redirectUrl: midtransData.redirect_url || null
       }
     });
-  } catch (error) {
-    console.error('Midtrans Error:', error);
-    res.status(500).json({
+  } catch (err) {
+    return res.status(500).json({
       success: false,
-      message: error.message || 'Terjadi kesalahan pada server pembayaran'
+      message: err.message || 'Terjadi kesalahan pada server transaksi'
     });
   }
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Q-MATE Backend Active' });
+// Ambil semua pesanan (dipakai POV Pembeli & POV Penjual)
+app.get('/api/orders', (req, res) => {
+  const orders = readOrders();
+  res.json({ success: true, data: orders });
 });
 
-// Sajikan file statis dari root folder
-app.use(express.static(path.join(__dirname)));
+// Simpan pesanan baru saat pembayaran pembeli berhasil / pending
+app.post('/api/orders', (req, res) => {
+  const incoming = req.body || {};
+  if (!incoming.orderId) {
+    return res.status(400).json({ success: false, message: 'orderId wajib diisi' });
+  }
 
-// Route fallback ke index.html
+  const orders = readOrders();
+  const existing = orders.find((o) => o.orderId === incoming.orderId);
+
+  if (!existing) {
+    const now = new Date();
+    const queueNumber = String(orders.length + 1).padStart(3, '0');
+    const newOrder = {
+      orderId: incoming.orderId,
+      queueNumber,
+      customerName: incoming.customerName || 'Pelanggan Q-MATE',
+      customerEmail: incoming.customerEmail || 'pelanggan@qmate.com',
+      items: Array.isArray(incoming.items) ? incoming.items : [],
+      totalAmount: Number(incoming.totalAmount) || 0,
+      createdAt: incoming.createdAt || now.toISOString(),
+      date: incoming.date || now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+      time: incoming.time || now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
+      status: incoming.status === 'Selesai' ? 'Selesai' : 'Diproses'
+    };
+    orders.unshift(newOrder);
+    writeOrders(orders);
+    return res.json({ success: true, data: newOrder });
+  }
+
+  return res.json({ success: true, data: exists });
+});
+
+// Penjual menandai pesanan Selesai (tidak ada endpoint DELETE agar riwayat tidak bisa dihapus)
+app.patch('/api/orders/:orderId', (req, res) => {
+  const { orderId } = req.params;
+  const orders = readOrders();
+  const target = orders.find((o) => o.orderId === orderId);
+
+  if (!target) {
+    return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+  }
+
+  target.status = 'Selesai';
+  writeOrders(orders);
+  res.json({ success: true, data: target });
+});
+
+// Fallback ke index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Jalankan Server pada port Railway
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Q-MATE Server is successfully running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Q-MATE server running on port ${PORT}`);
 });
