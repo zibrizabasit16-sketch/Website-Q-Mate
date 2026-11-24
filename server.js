@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// CORS agar akses antar-tab/perangkat aman
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
@@ -19,7 +18,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Penyimpanan permanen pesanan di server Railway (tanpa endpoint hapus)
 const ORDERS_FILE = path.join(__dirname, 'orders-data.json');
 
 function readOrders() {
@@ -40,7 +38,27 @@ function writeOrders(orders) {
   fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
 }
 
-// Endpoint transaksi Midtrans Snap (sesuaikan MIDTRANS_SERVER_KEY di Environment Variables Railway)
+// Verifikasi Login Email & Password Admin
+app.post('/api/admin/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const validEmail = (process.env.ADMIN_EMAIL || 'zibrizabasit16@gmail.com').trim().toLowerCase();
+  const validPassword = process.env.ADMIN_PASSWORD || 'QmateAdmin2026';
+
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: 'Email dan password wajib diisi' });
+  }
+
+  if (String(email).trim().toLowerCase() !== validEmail || String(password) !== validPassword) {
+    return res.status(401).json({ success: false, message: 'Email atau password admin salah' });
+  }
+
+  return res.json({
+    success: true,
+    admin: { email: validEmail }
+  });
+});
+
+// Transaksi Midtrans Snap
 app.post('/api/transactions', async (req, res) => {
   try {
     const { customerName, customerEmail, totalAmount, booth, items } = req.body || {};
@@ -131,13 +149,13 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
-// Ambil semua pesanan (dipakai POV Pembeli & POV Penjual)
+// Ambil semua pesanan
 app.get('/api/orders', (req, res) => {
   const orders = readOrders();
   res.json({ success: true, data: orders });
 });
 
-// Simpan pesanan baru saat pembayaran pembeli berhasil / pending
+// Simpan pesanan baru
 app.post('/api/orders', (req, res) => {
   const incoming = req.body || {};
   if (!incoming.orderId) {
@@ -145,9 +163,9 @@ app.post('/api/orders', (req, res) => {
   }
 
   const orders = readOrders();
-  const existing = orders.find((o) => o.orderId === incoming.orderId);
+  const exists = orders.find((o) => o.orderId === incoming.orderId);
 
-  if (!existing) {
+  if (!exists) {
     const now = new Date();
     const queueNumber = String(orders.length + 1).padStart(3, '0');
     const newOrder = {
@@ -170,7 +188,7 @@ app.post('/api/orders', (req, res) => {
   return res.json({ success: true, data: exists });
 });
 
-// Penjual menandai pesanan Selesai (tidak ada endpoint DELETE agar riwayat tidak bisa dihapus)
+// Update status pesanan menjadi Selesai
 app.patch('/api/orders/:orderId', (req, res) => {
   const { orderId } = req.params;
   const orders = readOrders();
@@ -185,7 +203,6 @@ app.patch('/api/orders/:orderId', (req, res) => {
   res.json({ success: true, data: target });
 });
 
-// Fallback ke index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });

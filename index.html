@@ -349,13 +349,19 @@
     </div>
   </div>
 
-  <!-- PIN Modal -->
+  <!-- Login Admin Modal -->
   <div class="modal-overlay" id="pinModal">
-    <div class="modal" style="max-width: 320px; text-align: center;">
+    <div class="modal" style="max-width: 360px;">
       <button class="modal-close" onclick="closePinModal()">x</button>
-      <h3 style="margin-bottom: 0.75rem; font-weight: 800;">Masukkan PIN Admin</h3>
-      <input type="password" id="adminPinInput" placeholder="****" maxlength="4" style="width: 100%; text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px; outline: none; margin-bottom: 1rem;">
-      <button class="btn-add" onclick="verifyPin()">Masuk</button>
+      <h3 style="margin-bottom: 0.35rem; font-weight: 800; text-align: center;">Login Admin Q-MATE</h3>
+      <p style="font-size: 0.85rem; color: var(--gray-text); margin-bottom: 1.25rem; text-align: center;">Masuk dengan akun pengelola booth</p>
+      <div style="margin-bottom: 0.75rem;">
+        <input type="email" id="adminEmailInput" placeholder="Email Admin" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 0.9rem;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <input type="password" id="adminPinInput" placeholder="Password Admin" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 0.9rem;">
+      </div>
+      <button class="btn-add" onclick="verifyPin()">Masuk Dashboard</button>
     </div>
   </div>
 
@@ -473,7 +479,6 @@
     function mergeOrders(serverOrders, localOrders) {
       const map = new Map();
 
-      // Prioritaskan data server agar queueNumber tetap konsisten di semua POV
       [...serverOrders, ...localOrders].forEach((item, idx) => {
         const norm = normalizeOrder(item, idx);
         const existing = map.get(norm.orderId);
@@ -651,6 +656,7 @@
     function closeAccountModal() { document.getElementById('accountModal').classList.remove('open'); switchNav('menu'); }
     function openPinModal() {
       closeAccountModal();
+      document.getElementById('adminEmailInput').value = '';
       document.getElementById('adminPinInput').value = '';
       document.getElementById('pinModal').classList.add('open');
     }
@@ -662,15 +668,36 @@
     }
 
     async function verifyPin() {
-      if (document.getElementById('adminPinInput').value === '1234') {
+      const email = document.getElementById('adminEmailInput').value.trim();
+      const password = document.getElementById('adminPinInput').value;
+
+      if (!email || !password) {
+        showToast('Isi email dan password admin.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.success) {
+          showToast(data.message || 'Email atau password salah.');
+          return;
+        }
+
         closePinModal();
         isAdminPanelOpen = true;
         await syncOrdersFromBackend();
         ordersList.forEach(o => knownOrderIds.add(o.orderId));
         renderAdminOrders();
         document.getElementById('adminModal').classList.add('open');
-      } else {
-        showToast('PIN Salah. Gunakan PIN 1234.');
+        showToast('Login admin berhasil.');
+      } catch {
+        showToast('Gagal terhubung ke server.');
       }
     }
 
