@@ -209,6 +209,77 @@
       padding: 1rem 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       border-radius: 8px; font-weight: 700; font-size: 0.9rem;
     }
+
+    /* ---------- Full-Screen Admin Dashboard ---------- */
+    .admin-fullscreen {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #F8FAFC; z-index: 2200; display: none; flex-direction: column;
+      overflow: hidden;
+    }
+    .admin-fullscreen.open { display: flex; }
+    .admin-topbar {
+      background: var(--brown-theme); color: var(--white);
+      padding: 1rem 1.75rem; display: flex; justify-content: space-between;
+      align-items: center; gap: 1rem; flex-wrap: wrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .admin-tabs {
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.75rem; display: flex; justify-content: space-between;
+      align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .admin-tab-group { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .admin-tab-btn {
+      background: #F1F5F9; color: var(--dark); border: none;
+      padding: 0.6rem 1.2rem; border-radius: var(--radius-pill);
+      font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: var(--transition);
+    }
+    .admin-tab-btn.active {
+      background: var(--primary); color: var(--white);
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    }
+    .admin-body {
+      flex: 1; overflow-y: auto; padding: 1.5rem 1.75rem 3rem;
+      max-width: 1200px; width: 100%; margin: 0 auto;
+    }
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .kpi-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.25rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+    .kpi-label {
+      font-size: 0.78rem; font-weight: 800; color: var(--gray-text);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;
+    }
+    .kpi-value {
+      font-size: 1.65rem; font-weight: 800; color: var(--dark);
+    }
+    .kpi-sub {
+      font-size: 0.82rem; color: var(--gray-text); margin-top: 0.25rem;
+    }
+    .admin-card-box {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+    .sales-table-wrap { width: 100%; overflow-x: auto; }
+    .sales-table {
+      width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 720px;
+    }
+    .sales-table th {
+      text-align: left; padding: 0.85rem 0.75rem; background: #F8FAFC;
+      color: var(--gray-text); font-weight: 800; font-size: 0.78rem;
+      text-transform: uppercase; border-bottom: 1px solid var(--border);
+    }
+    .sales-table td {
+      padding: 0.85rem 0.75rem; border-bottom: 1px solid var(--border);
+      vertical-align: top; color: var(--dark);
+    }
+    .sales-table tr:hover td { background: #FFFBEB; }
   </style>
 </head>
 <body>
@@ -258,7 +329,7 @@
             <h3>Piscok Original (Satuan)</h3>
             <div class="menu-price">Rp 4.000</div>
           </div>
-          <p class="menu-desc">1 Pcs pisang original nan renyah dengan lumeran cokelat di dalamnya.</p>
+          <p class="menu-desc">1 pcs pisang gulung krispi original nan renyah dengan lumeran cokelat asli di dalamnya.</p>
           <div class="card-actions">
             <div class="qty-control">
               <button class="qty-btn" onclick="changeQty(this,-1)">-</button>
@@ -281,7 +352,7 @@
             <h3>Piscok With Crunchy (Satuan)</h3>
             <div class="menu-price">Rp 5.000</div>
           </div>
-          <p class="menu-desc">1 pcs piscok lumer dengan isi choco crunchy renyah di dalam krispi di luar.</p>
+          <p class="menu-desc">1 pcs piscok lumer dengan balutan topping choco crunchy renyah di luar.</p>
           <div class="card-actions">
             <div class="qty-control">
               <button class="qty-btn" onclick="changeQty(this,-1)">-</button>
@@ -438,24 +509,110 @@
     </div>
   </div>
 
-  <!-- Admin Dashboard Modal (POV Penjual) -->
-  <div class="modal-overlay" id="adminModal">
-    <div class="modal" style="max-width: 560px;">
-      <button class="modal-close" onclick="closeAdminPanel()">x</button>
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-right: 2rem;">
-        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0;">Kelola Pesanan Masuk</h2>
-        <button onclick="openResetPinModal()" style="background:#EF4444; color:white; border:none; padding:0.45rem 0.85rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">Reset #001</button>
+  <!-- Full-Screen Admin Dashboard (POV Penjual: Antrean + Omset & Data Pembeli) -->
+  <div class="admin-fullscreen" id="adminModal">
+    <div class="admin-topbar">
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0;">Dashboard Pengelola Q-MATE</h2>
+        <p style="font-size: 0.8rem; opacity: 0.85;">Booth B-04 • Pantau Antrean, Data Pembeli & Total Omset</p>
       </div>
-      <div id="adminOrderContent"></div>
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <button onclick="openResetPinModal()" style="background:#EF4444; color:white; border:none; padding:0.55rem 1rem; border-radius:10px; font-weight:800; font-size:0.85rem; cursor:pointer;">Reset #001</button>
+        <button onclick="closeAdminPanel()" style="background:rgba(255,255,255,0.18); color:white; border:none; padding:0.55rem 1rem; border-radius:10px; font-weight:800; font-size:0.85rem; cursor:pointer;">Tutup</button>
+      </div>
+    </div>
+
+    <div class="admin-tabs">
+      <div class="admin-tab-group">
+        <button class="admin-tab-btn active" id="tabBtnQueue" onclick="switchAdminTab('queue')">Antrean Pesanan Masuk</button>
+        <button class="admin-tab-btn" id="tabBtnSales" onclick="switchAdminTab('sales')">Omset & Data Pembeli</button>
+      </div>
+      <div id="adminQuickOmsetBadge" style="font-weight: 800; font-size: 0.92rem; color: var(--primary-dark); background: #FEF3C7; padding: 0.45rem 0.95rem; border-radius: var(--radius-pill);">
+        Total Omset: Rp 0
+      </div>
+    </div>
+
+    <div class="admin-body">
+      <!-- View 1: Kelola Antrean Masuk -->
+      <div id="adminQueueSection">
+        <div id="adminOrderContent"></div>
+      </div>
+
+      <!-- View 2: Laporan Omset & Data Pembeli -->
+      <div id="adminSalesSection" style="display: none;">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Pendapatan (Omset)</div>
+            <div class="kpi-value" id="kpiTotalRevenue" style="color: var(--primary);">Rp 0</div>
+            <div class="kpi-sub" id="kpiRevenueScope">Semua transaksi sukses</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Pembeli / Transaksi</div>
+            <div class="kpi-value" id="kpiTotalOrders">0</div>
+            <div class="kpi-sub">Transaksi terbayar</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Item / Paket Terjual</div>
+            <div class="kpi-value" id="kpiTotalQty">0</div>
+            <div class="kpi-sub" id="kpiTotalPcs">0 pcs piscok keluar</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Menu Terlaris</div>
+            <div class="kpi-value" id="kpiBestSeller" style="font-size: 1.15rem; line-height: 1.3;">-</div>
+            <div class="kpi-sub" id="kpiBestSellerSub">Belum ada penjualan</div>
+          </div>
+        </div>
+
+        <!-- Ringkasan Penjualan per Produk -->
+        <div class="admin-card-box">
+          <h3 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.85rem;">Rincian Pendapatan per Produk</h3>
+          <div id="productBreakdownContent"></div>
+        </div>
+
+        <!-- Tabel Data Pembeli & Transaksi -->
+        <div class="admin-card-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
+            <div>
+              <h3 style="font-size: 1.05rem; font-weight: 800;">Data Pembeli & Riwayat Transaksi</h3>
+              <p style="font-size: 0.82rem; color: var(--gray-text);">Data ini tetap tersimpan meskipun nomor antrean di-reset ke #001</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <select id="salesPeriodFilter" onchange="renderSalesDashboard()" style="padding: 0.55rem 0.85rem; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; outline: none;">
+                <option value="all">Semua Waktu</option>
+                <option value="today">Hari Ini</option>
+              </select>
+              <input type="text" id="salesSearchInput" oninput="renderSalesDashboard()" placeholder="Cari nama / email pembeli..." style="padding: 0.55rem 0.85rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none;">
+              <button onclick="exportSalesCsv()" style="background:#0D9488; color:white; border:none; padding:0.55rem 0.95rem; border-radius:8px; font-weight:800; font-size:0.85rem; cursor:pointer;">Download CSV</button>
+            </div>
+          </div>
+
+          <div class="sales-table-wrap">
+            <table class="sales-table">
+              <thead>
+                <tr>
+                  <th>Antrean</th>
+                  <th>Waktu</th>
+                  <th>Nama Pembeli</th>
+                  <th>Email</th>
+                  <th>Produk Dibeli</th>
+                  <th>Total Bayar</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="salesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Reset PIN Modal -->
-  <div class="modal-overlay" id="resetPinModal">
+  <div class="modal-overlay" id="resetPinModal" style="z-index: 2500;">
     <div class="modal" style="max-width: 340px; text-align: center;">
       <button class="modal-close" onclick="closeResetPinModal()">x</button>
       <h3 style="margin-bottom: 0.35rem; font-weight: 800;">PIN Rahasia Reset</h3>
-      <p style="font-size: 0.85rem; color: var(--gray-text); margin-bottom: 1rem;">Masukkan PIN khusus untuk mereset antrean ke #001</p>
+      <p style="font-size: 0.85rem; color: var(--gray-text); margin-bottom: 1rem;">Masukkan PIN khusus untuk mereset antrean ke #001 (riwayat omset tetap aman)</p>
       <input type="password" id="resetSecretPinInput" placeholder="••••" maxlength="10" style="width: 100%; text-align: center; font-size: 1.35rem; letter-spacing: 0.35rem; padding: 0.65rem; border: 1px solid var(--border); border-radius: 8px; outline: none; margin-bottom: 1rem;">
       <button onclick="confirmResetWithPin()" style="background:#EF4444; color:white; border:none; border-radius:14px; padding:0.9rem 0; font-weight:800; font-size:1rem; cursor:pointer; width:100%;">Konfirmasi Reset #001</button>
     </div>
@@ -480,11 +637,14 @@
   <script>
     let cart = [];
     let ordersList = [];
+    let salesHistoryList = [];
     let knownOrderIds = new Set();
     let isAdminPanelOpen = false;
+    let currentAdminTab = 'queue';
 
     const API_BASE_URL = 'https://website-q-mate-production.up.railway.app';
     const STORAGE_KEY = 'qmate_orders_record_v1';
+    const SALES_STORAGE_KEY = 'qmate_sales_history_v1';
     const BUYER_ORDERS_KEY = 'qmate_my_order_ids_v1';
 
     function loadBuyerOrderIds() {
@@ -511,9 +671,9 @@
       return ordersList.filter(o => myIds.has(o.orderId));
     }
 
-    function loadLocalOrders() {
+    function loadJsonLocal(key) {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(key);
         const parsed = raw ? JSON.parse(raw) : [];
         return Array.isArray(parsed) ? parsed : [];
       } catch {
@@ -521,9 +681,9 @@
       }
     }
 
-    function saveLocalOrders(list) {
+    function saveJsonLocal(key, list) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        localStorage.setItem(key, JSON.stringify(list));
       } catch {}
     }
 
@@ -557,13 +717,14 @@
         customerEmail: raw.customerEmail || 'pelanggan@qmate.com',
         items: Array.isArray(raw.items) ? raw.items : [],
         totalAmount: Number(raw.totalAmount) || 0,
+        createdAt: raw.createdAt || created.toISOString(),
         date: dateStr,
         time: timeStr,
         status: raw.status === 'Selesai' ? 'Selesai' : 'Diproses'
       };
     }
 
-    function mergeOrders(serverOrders, localOrders) {
+    function mergeOrders(serverOrders, localOrders, sortByNewestTime = false) {
       const map = new Map();
 
       (Array.isArray(serverOrders) ? serverOrders : []).forEach((item, idx) => {
@@ -584,6 +745,9 @@
       });
 
       return Array.from(map.values()).sort((a, b) => {
+        if (sortByNewestTime) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
         const numA = parseInt(a.queueNumber, 10) || 0;
         const numB = parseInt(b.queueNumber, 10) || 0;
         return numB - numA;
@@ -591,24 +755,47 @@
     }
 
     async function syncOrdersFromBackend() {
-      const local = loadLocalOrders();
-      ordersList = mergeOrders([], local);
+      const localOrders = loadJsonLocal(STORAGE_KEY);
+      const localSales = loadJsonLocal(SALES_STORAGE_KEY);
+      ordersList = mergeOrders([], localOrders, false);
+      salesHistoryList = mergeOrders(ordersList, localSales, true);
+
       try {
-        const res = await fetch(`${API_BASE_URL}/api/orders`, { method: 'GET' });
-        if (!res.ok) return ordersList;
-        const data = await res.json().catch(() => ({}));
-        const remoteList = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
-        ordersList = mergeOrders(remoteList, local);
-        saveLocalOrders(ordersList);
+        const [ordersRes, salesRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/orders`, { method: 'GET' }),
+          fetch(`${API_BASE_URL}/api/sales`, { method: 'GET' }).catch(() => null)
+        ]);
+
+        if (ordersRes && ordersRes.ok) {
+          const data = await ordersRes.json().catch(() => ({}));
+          const remoteOrders = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+          ordersList = mergeOrders(remoteOrders, localOrders, false);
+          saveJsonLocal(STORAGE_KEY, ordersList);
+        }
+
+        if (salesRes && salesRes.ok) {
+          const sData = await salesRes.json().catch(() => ({}));
+          const remoteSales = Array.isArray(sData) ? sData : (Array.isArray(sData.data) ? sData.data : []);
+          salesHistoryList = mergeOrders([...remoteSales, ...ordersList], localSales, true);
+          saveJsonLocal(SALES_STORAGE_KEY, salesHistoryList);
+        } else {
+          salesHistoryList = mergeOrders(ordersList, localSales, true);
+          saveJsonLocal(SALES_STORAGE_KEY, salesHistoryList);
+        }
       } catch {}
+
+      updateQuickOmsetBadge();
       return ordersList;
     }
 
     async function persistOrderToBackend(orderObj) {
       saveBuyerOrderId(orderObj.orderId);
-      ordersList = mergeOrders([orderObj], ordersList);
-      saveLocalOrders(ordersList);
+      ordersList = mergeOrders([orderObj], ordersList, false);
+      salesHistoryList = mergeOrders([orderObj], salesHistoryList, true);
+      saveJsonLocal(STORAGE_KEY, ordersList);
+      saveJsonLocal(SALES_STORAGE_KEY, salesHistoryList);
       knownOrderIds.add(orderObj.orderId);
+      updateQuickOmsetBadge();
 
       try {
         const res = await fetch(`${API_BASE_URL}/api/orders`, {
@@ -618,15 +805,20 @@
         });
         const saved = await res.json().catch(() => null);
         if (saved && saved.success && saved.data) {
-          ordersList = mergeOrders([saved.data], ordersList);
-          saveLocalOrders(ordersList);
+          ordersList = mergeOrders([saved.data], ordersList, false);
+          salesHistoryList = mergeOrders([saved.data], salesHistoryList, true);
+          saveJsonLocal(STORAGE_KEY, ordersList);
+          saveJsonLocal(SALES_STORAGE_KEY, salesHistoryList);
+          updateQuickOmsetBadge();
         }
       } catch {}
     }
 
     async function updateOrderStatusOnBackend(orderId, status) {
       ordersList = ordersList.map(item => item.orderId === orderId ? { ...item, status } : item);
-      saveLocalOrders(ordersList);
+      salesHistoryList = salesHistoryList.map(item => item.orderId === orderId ? { ...item, status } : item);
+      saveJsonLocal(STORAGE_KEY, ordersList);
+      saveJsonLocal(SALES_STORAGE_KEY, salesHistoryList);
       try {
         await fetch(`${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}`, {
           method: 'PATCH',
@@ -666,6 +858,7 @@
 
       if (isAdminPanelOpen) {
         renderAdminOrders();
+        renderSalesDashboard();
       }
       if (document.getElementById('orderModal').classList.contains('open')) {
         renderOrders();
@@ -757,6 +950,19 @@
       switchNav('menu');
     }
 
+    function switchAdminTab(tab) {
+      currentAdminTab = tab;
+      document.getElementById('tabBtnQueue').classList.toggle('active', tab === 'queue');
+      document.getElementById('tabBtnSales').classList.toggle('active', tab === 'sales');
+      document.getElementById('adminQueueSection').style.display = tab === 'queue' ? 'block' : 'none';
+      document.getElementById('adminSalesSection').style.display = tab === 'sales' ? 'block' : 'none';
+      if (tab === 'sales') {
+        renderSalesDashboard();
+      } else {
+        renderAdminOrders();
+      }
+    }
+
     function openResetPinModal() {
       document.getElementById('resetSecretPinInput').value = '';
       document.getElementById('resetPinModal').classList.add('open');
@@ -792,7 +998,8 @@
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(BUYER_ORDERS_KEY);
         renderAdminOrders();
-        showToast('Antrean direset. Pesanan berikutnya akan menjadi Antrean #001.');
+        renderSalesDashboard();
+        showToast('Antrean direset ke #001. Riwayat omset tetap tersimpan.');
       } catch {
         showToast('Gagal menghubungi server untuk reset antrean.');
       }
@@ -824,7 +1031,8 @@
         isAdminPanelOpen = true;
         await syncOrdersFromBackend();
         ordersList.forEach(o => knownOrderIds.add(o.orderId));
-        renderAdminOrders();
+        switchAdminTab('queue');
+        renderSalesDashboard();
         document.getElementById('adminModal').classList.add('open');
         showToast('Login admin berhasil.');
       } catch {
@@ -948,14 +1156,14 @@
         : '';
 
       return `
-        <div style="background:#F8FAFC; padding:1.25rem; border-radius:12px; margin-bottom:1rem; border:1px solid var(--border); border-left:4px solid var(--primary);">
+        <div style="background:#FFFFFF; padding:1.25rem; border-radius:14px; margin-bottom:1rem; border:1px solid var(--border); border-left:5px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
             <b style="font-size:1.05rem; color:var(--dark);">Antrean #${o.queueNumber}</b>
             <span style="font-size:0.8rem; font-weight:800; background:${badgeBg}; color:${badgeColor}; padding:0.2rem 0.65rem; border-radius:var(--radius-pill);">${o.status}</span>
           </div>
           <div style="font-size:0.8rem; color:var(--gray-text); margin-bottom:0.25rem;">ID: <b>${o.orderId}</b> • ${o.date} • Jam ${o.time}</div>
           <div style="font-size:0.85rem; color:var(--gray-text); margin-bottom:0.65rem;">Pelanggan: <b>${o.customerName}</b> (${o.customerEmail})</div>
-          <div style="background:white; padding:0.75rem; border-radius:8px; border:1px solid var(--border); margin-bottom:0.75rem;">
+          <div style="background:#F8FAFC; padding:0.75rem; border-radius:8px; border:1px solid var(--border); margin-bottom:0.75rem;">
             ${o.items.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:700; color:var(--dark); margin-bottom:0.25rem;"><span>${i.nama}</span><span>x${i.qty} (Rp ${(i.harga * i.qty).toLocaleString('id-ID')})</span></div>`).join('')}
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -969,6 +1177,7 @@
     async function markOrderDone(orderId) {
       await updateOrderStatusOnBackend(orderId, 'Selesai');
       renderAdminOrders();
+      renderSalesDashboard();
       const target = ordersList.find(item => item.orderId === orderId);
       if (target) {
         showToast(`Antrean #${target.queueNumber} ditandai selesai.`);
@@ -988,10 +1197,168 @@
     function renderAdminOrders() {
       const c = document.getElementById('adminOrderContent');
       if (ordersList.length === 0) {
-        c.innerHTML = '<p style="text-align:center; color:var(--gray-text); padding:2rem;">Belum ada pesanan masuk.</p>';
+        c.innerHTML = '<div style="background:white; border:1px solid var(--border); border-radius:16px; text-align:center; color:var(--gray-text); padding:2.5rem;">Belum ada pesanan masuk pada sesi antrean ini.</div>';
         return;
       }
       c.innerHTML = ordersList.map(o => renderOrderCard(o, true)).join('');
+    }
+
+    function estimatePcsCount(itemName, qty) {
+      const lower = String(itemName || '').toLowerCase();
+      if (lower.includes('isi 3')) return qty * 3;
+      if (lower.includes('mix')) return qty * 2;
+      return qty;
+    }
+
+    function getFilteredSalesList() {
+      const periodEl = document.getElementById('salesPeriodFilter');
+      const searchEl = document.getElementById('salesSearchInput');
+      const period = periodEl ? periodEl.value : 'all';
+      const keyword = searchEl ? searchEl.value.trim().toLowerCase() : '';
+      const todayStr = new Date().toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      return salesHistoryList.filter((o) => {
+        if (period === 'today' && o.date !== todayStr) return false;
+        if (keyword) {
+          const matchName = String(o.customerName || '').toLowerCase().includes(keyword);
+          const matchEmail = String(o.customerEmail || '').toLowerCase().includes(keyword);
+          const matchId = String(o.orderId || '').toLowerCase().includes(keyword);
+          if (!matchName && !matchEmail && !matchId) return false;
+        }
+        return true;
+      });
+    }
+
+    function updateQuickOmsetBadge() {
+      const badge = document.getElementById('adminQuickOmsetBadge');
+      if (!badge) return;
+      const totalAll = salesHistoryList.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+      badge.textContent = `Total Omset: Rp ${totalAll.toLocaleString('id-ID')}`;
+    }
+
+    function renderSalesDashboard() {
+      updateQuickOmsetBadge();
+      const filtered = getFilteredSalesList();
+      const periodEl = document.getElementById('salesPeriodFilter');
+      const isToday = periodEl && periodEl.value === 'today';
+
+      let totalRevenue = 0;
+      let totalQty = 0;
+      let totalPcs = 0;
+      const productStats = new Map();
+
+      filtered.forEach((o) => {
+        totalRevenue += Number(o.totalAmount) || 0;
+        (o.items || []).forEach((it) => {
+          const qty = Number(it.qty) || 0;
+          const sub = (Number(it.harga) || 0) * qty;
+          totalQty += qty;
+          totalPcs += estimatePcsCount(it.nama, qty);
+
+          const prev = productStats.get(it.nama) || { name: it.nama, qty: 0, revenue: 0 };
+          prev.qty += qty;
+          prev.revenue += sub;
+          productStats.set(it.nama, prev);
+        });
+      });
+
+      document.getElementById('kpiTotalRevenue').textContent = 'Rp ' + totalRevenue.toLocaleString('id-ID');
+      document.getElementById('kpiRevenueScope').textContent = isToday ? 'Pendapatan hari ini' : 'Semua transaksi sukses';
+      document.getElementById('kpiTotalOrders').textContent = filtered.length.toLocaleString('id-ID');
+      document.getElementById('kpiTotalQty').textContent = totalQty.toLocaleString('id-ID');
+      document.getElementById('kpiTotalPcs').textContent = `${totalPcs.toLocaleString('id-ID')} pcs piscok keluar`;
+
+      const sortedProducts = Array.from(productStats.values()).sort((a, b) => b.qty - a.qty);
+      if (sortedProducts.length > 0) {
+        document.getElementById('kpiBestSeller').textContent = sortedProducts[0].name;
+        document.getElementById('kpiBestSellerSub').textContent = `${sortedProducts[0].qty}x terjual (Rp ${sortedProducts[0].revenue.toLocaleString('id-ID')})`;
+      } else {
+        document.getElementById('kpiBestSeller').textContent = '-';
+        document.getElementById('kpiBestSellerSub').textContent = 'Belum ada penjualan';
+      }
+
+      const breakdownEl = document.getElementById('productBreakdownContent');
+      if (sortedProducts.length === 0) {
+        breakdownEl.innerHTML = '<p style="color:var(--gray-text); font-size:0.9rem;">Belum ada data penjualan produk pada filter ini.</p>';
+      } else {
+        breakdownEl.innerHTML = sortedProducts.map((p) => {
+          const pct = totalRevenue > 0 ? Math.round((p.revenue / totalRevenue) * 100) : 0;
+          return `
+            <div style="margin-bottom: 0.85rem;">
+              <div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:700; margin-bottom:0.3rem;">
+                <span>${p.name} <span style="color:var(--gray-text); font-weight:600;">(${p.qty}x terjual)</span></span>
+                <span style="color:var(--primary-dark);">Rp ${p.revenue.toLocaleString('id-ID')} (${pct}%)</span>
+              </div>
+              <div style="width:100%; height:8px; background:#F1F5F9; border-radius:999px; overflow:hidden;">
+                <div style="width:${pct}%; height:100%; background:var(--primary); border-radius:999px;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const tbody = document.getElementById('salesTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--gray-text); padding:1.75rem;">Belum ada data pembeli pada filter ini.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((o) => {
+        const badgeBg = o.status === 'Selesai' ? '#DCFCE7' : '#FEF3C7';
+        const badgeColor = o.status === 'Selesai' ? '#15803D' : '#B45309';
+        const itemsText = (o.items || []).map(i => `${i.nama} (x${i.qty})`).join('<br>');
+        return `
+          <tr>
+            <td><b>#${o.queueNumber}</b></td>
+            <td>${o.date}<br><span style="color:var(--gray-text); font-size:0.78rem;">Jam ${o.time}</span></td>
+            <td><b>${o.customerName}</b></td>
+            <td style="color:var(--gray-text);">${o.customerEmail}</td>
+            <td>${itemsText}</td>
+            <td style="font-weight:800; color:var(--primary-dark); white-space:nowrap;">Rp ${o.totalAmount.toLocaleString('id-ID')}</td>
+            <td><span style="font-size:0.75rem; font-weight:800; background:${badgeBg}; color:${badgeColor}; padding:0.2rem 0.6rem; border-radius:999px;">${o.status}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function exportSalesCsv() {
+      const filtered = getFilteredSalesList();
+      if (filtered.length === 0) {
+        showToast('Tidak ada data transaksi untuk diunduh.');
+        return;
+      }
+
+      const headers = ['Antrean', 'Order ID', 'Tanggal', 'Jam', 'Nama Pembeli', 'Email', 'Produk Dibeli', 'Total Bayar', 'Status'];
+      const rows = filtered.map((o) => {
+        const itemsStr = (o.items || []).map(i => `${i.nama} x${i.qty}`).join(' | ');
+        return [
+          `#${o.queueNumber}`,
+          o.orderId,
+          o.date,
+          o.time,
+          o.customerName,
+          o.customerEmail,
+          itemsStr,
+          o.totalAmount,
+          o.status
+        ].map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(',');
+      });
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `laporan-omset-qmate-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast('Laporan omset berhasil diunduh (CSV).');
     }
 
     function showToast(msg) {

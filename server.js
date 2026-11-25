@@ -19,14 +19,15 @@ app.use((req, res, next) => {
 });
 
 const ORDERS_FILE = path.join(__dirname, 'orders-data.json');
+const SALES_FILE = path.join(__dirname, 'sales-history.json');
 
-function readOrders() {
+function readJsonArray(filePath) {
   try {
-    if (!fs.existsSync(ORDERS_FILE)) {
-      fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2));
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify([], null, 2));
       return [];
     }
-    const raw = fs.readFileSync(ORDERS_FILE, 'utf8');
+    const raw = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
@@ -34,8 +35,24 @@ function readOrders() {
   }
 }
 
+function writeJsonArray(filePath, data) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+
+function readOrders() {
+  return readJsonArray(ORDERS_FILE);
+}
+
 function writeOrders(orders) {
-  fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
+  writeJsonArray(ORDERS_FILE, orders);
+}
+
+function readSales() {
+  return readJsonArray(SALES_FILE);
+}
+
+function writeSales(sales) {
+  writeJsonArray(SALES_FILE, sales);
 }
 
 // Verifikasi Login Email & Password Admin
@@ -149,13 +166,19 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
-// Ambil semua pesanan
+// Ambil antrean aktif
 app.get('/api/orders', (req, res) => {
   const orders = readOrders();
   res.json({ success: true, data: orders });
 });
 
-// Simpan pesanan baru
+// Ambil seluruh arsip penjualan & omset
+app.get('/api/sales', (req, res) => {
+  const sales = readSales();
+  res.json({ success: true, data: sales });
+});
+
+// Simpan pesanan baru ke antrean aktif & arsip omset permanen
 app.post('/api/orders', (req, res) => {
   const incoming = req.body || {};
   if (!incoming.orderId) {
@@ -167,7 +190,12 @@ app.post('/api/orders', (req, res) => {
 
   if (!exists) {
     const now = new Date();
-    const queueNumber = String(orders.length + 1).padStart(3, '0');
+    const maxExistingQueue = orders.reduce((maxVal, item) => {
+      const parsed = parseInt(String(item.queueNumber || '0').replace(/\D/g, ''), 10);
+      return !Number.isNaN(parsed) && parsed > maxVal ? parsed : maxVal;
+    }, 0);
+
+    const queueNumber = String(maxExistingQueue + 1).padStart(3, '0');
     const newOrder = {
       orderId: incoming.orderId,
       queueNumber,
@@ -180,8 +208,17 @@ app.post('/api/orders', (req, res) => {
       time: incoming.time || now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
       status: incoming.status === 'Selesai' ? 'Selesai' : 'Diproses'
     };
+
     orders.unshift(newOrder);
     writeOrders(orders);
+
+    // Simpan juga ke arsip penjualan permanen agar omset tetap tercatat walau antrean di-reset
+    const sales = readSales();
+    if (!sales.some((s) => s.orderId === newOrder.orderId)) {
+      sales.unshift(newOrder);
+      writeSales(sales);
+    }
+
     return res.json({ success: true, data: newOrder });
   }
 
@@ -200,10 +237,18 @@ app.patch('/api/orders/:orderId', (req, res) => {
 
   target.status = 'Selesai';
   writeOrders(orders);
+
+  const sales = readSales();
+  const saleTarget = sales.find((s) => s.orderId === orderId);
+  if (saleTarget) {
+    saleTarget.status = 'Selesai';
+    writeSales(sales);
+  }
+
   res.json({ success: true, data: target });
 });
 
-// Reset semua data pesanan ke #001 setelah validasi PIN rahasia
+// Reset antrean aktif ke #001 (arsip omset tetap aman)
 app.post('/api/orders/reset', (req, res) => {
   try {
     const { resetPin } = req.body || {};
