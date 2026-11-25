@@ -258,7 +258,7 @@
             <h3>Piscok Original (Satuan)</h3>
             <div class="menu-price">Rp 4.000</div>
           </div>
-          <p class="menu-desc">1 pcs pisang gulung krispi original nan renyah dengan lumeran cokelat asli di dalamnya.</p>
+          <p class="menu-desc">1 Pcs pisang original nan renyah dengan lumeran cokelat di dalamnya.</p>
           <div class="card-actions">
             <div class="qty-control">
               <button class="qty-btn" onclick="changeQty(this,-1)">-</button>
@@ -281,7 +281,7 @@
             <h3>Piscok With Crunchy (Satuan)</h3>
             <div class="menu-price">Rp 5.000</div>
           </div>
-          <p class="menu-desc">1 pcs piscok lumer dengan balutan topping choco crunchy renyah di luar.</p>
+          <p class="menu-desc">1 pcs piscok lumer dengan isi choco crunchy renyah di dalam krispi di luar.</p>
           <div class="card-actions">
             <div class="qty-control">
               <button class="qty-btn" onclick="changeQty(this,-1)">-</button>
@@ -900,17 +900,16 @@
         window.snap.pay(token, {
           onSuccess: async function(res) {
             await completeOrder(name, email, itemsSnapshot, total, orderIdFromServer || (res && res.order_id));
-            showToast('Pembayaran berhasil. Pesanan terdata.');
+            showToast('Pembayaran berhasil. Pesanan masuk ke antrean.');
           },
-          onPending: async function(res) {
-            await completeOrder(name, email, itemsSnapshot, total, orderIdFromServer || (res && res.order_id));
-            showToast('Menunggu pembayaran. Pesanan terdata.');
+          onPending: function() {
+            showToast('Pembayaran belum selesai. Pesanan belum masuk ke antrean.');
           },
           onError: function() {
-            showToast('Pembayaran gagal diproses.');
+            showToast('Pembayaran gagal diproses. Pesanan tidak masuk ke antrean.');
           },
           onClose: function() {
-            showToast('Jendela pembayaran ditutup sebelum selesai.');
+            showToast('Pembayaran dibatalkan. Pesanan tidak masuk ke antrean.');
           }
         });
       })
